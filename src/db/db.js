@@ -30,9 +30,9 @@ const modelProject = require('./model/projects');       // PROYECTOS BUSINESS
 // AVANCE PROYECTO
 const modelProgress = require('./model/avance');        // Avance o notas
 
-const entorno = false; 
+const entorno = true; 
 
-let dburl = entorno ? 'postgresql://postgres:JStlLHdfw1jM2qmdhzFS@containers-us-west-66.railway.app:6622/railway' : 'postgres:postgres:123@localhost:5432/crm';
+let dburl = entorno ? 'postgresql://postgres:wsQuFeklqZnVnzzSkqdnrUXYLjtQWsXG@postgres.railway.internal:5432/railway' : 'postgres:postgres:123@localhost:5432/crm';
 
 const sequelize = new Sequelize(dburl, {
     logging: false,
