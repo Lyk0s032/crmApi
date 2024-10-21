@@ -2,14 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const {Sequelize,  DataTypes, INTEGER } = require('sequelize');
 
-const {db, Op } = require('./src/db/db');
-const { signUp, getUserById, responseInvitation, getUserPanel, validatePhone, signIn } = require('./src/controllers/user');
-const { newBusiness, configureBusiness, getBusiness, getBusinessById, addContactInformationBusiness, sendInvitation, newOrigin, newProspect, dontCall, neverCall, called, getBusinessOpen, getBusinessLogin } = require('./src/controllers/business');
-const { deleteContact, newGroup } = require('./src/controllers/contacts');
-const { getAllClients, newClient, getAllProspectByAsesor, getAllProspect, getProspect } = require('./src/controllers/client');
-const isAuthenticated = require('./src/controllers/authentication');
-const { newClientBusiness, getClientsBusiness, getAllProspects, getClientById, newProject, getProjectById, newNoteProgress } = require('./src/controllers/clientBusiness');
-
+const {db, Op } = require('./srcEvolution/db/db');
+const { getAllClients, newFuente, newClient, dontCallIntentos, contestoSinInteres, contestoPeroLlamarDespues, contestoYTieneInteresReal, dontCallContacto, contestoPeroLlamarDespuesContacto, contestoSinInteresContacto, contestoYTieneInteresRealContacto, contestoSinInteresVisita, contestoPeroLlamarDespuesVisita, deseaOtroServicio, visitaACotizacion, changeStateToCotizacion, aplazarCotizacion, getClientsByState, getAllIntentos, getAllContactos, getAllVisitas, getAllCotizaciones, getCalendaryAll, getAllAprobadas } = require('./srcEvolution/controllers/client');
+const { getCalendary } = require('./srcEvolution/controllers/calendary');
 
 const app = express();
 app.use(express.json()); 
@@ -32,81 +27,71 @@ app.get('/', (req, res)  => {
     res.send('Running CRM');
 })
 
-// Usuarios - vendedores.
-app.get('/app/signIn/', isAuthenticated, async (req, res) => {
-  try {
-      console.log(req.user);
-      res.status(200).json({user: req.user});
-  }catch(err){
-    console.log(err);
-    res.status(500).json({msg: 'error en la principal'});
-  }
-})
+// GET
+app.get('/clients/get/all/', getAllClients);
 
-// RUTAS GET
-  // LOGIN
-
-  app.get('/user/sign/v/:phone', validatePhone);      // Validamos que exista el phone
-  app.get('/business/app/general/:BId/:UId', getBusinessLogin);
-app.get('/user/w/:uId', getUserById);                 // Obtenemos los usuarios.
-app.get('/user/panel/:uID', getUserPanel);
-app.get('/business/get', getBusiness);                // Obtenemos todos los business.
-app.get('/business/get/:bId', getBusinessById);       // Obtenemos business por ID
-app.get('/business/clients/:bId', getAllClients);        // Obtenemos todos los clientes de un proyecto.
-  
-  // CLIENTES
-  app.get('/business/app/clients/:businessId/:asesorId/:asesor', getClientsBusiness);
-  
-  
-  // BUSCAR PROSPECTOS DEL CLIENTE
-  app.get('/business/prospect/:BId/:AId/:mes', getAllProspectByAsesor); // Obtenemos los prospectos por asesor
-  app.get('/business/prospect/:BId/:mes', getAllProspect); // Obtenemos los prospectos por asesor
-  app.get('/business/g/prospect/:BId/:PId', getProspect);   // Obtener prospecto individual
-
-  // PROSPECT APP
-  app.get('/business/app/prospect/:businessId/:asesorId/:mes/:asesor', getAllProspects);
-  app.get('/business/open/:BId/:UId', getBusinessOpen); // Abrimos el business logueado
-  app.get('/cliente/app/get/:ClientId', getClientById); // Obtenemos el cliente
-
-  app.get('/cliente/app/project/get/:projectId', getProjectById); // OBTENEMOS PROYECTO POR ID
-  // RUTAS POST
-
-app.post('/user/signIn', signIn);                        // Iniciar sesion
-app.post('/user/signUp', signUp);                        // Crear cuenta - USUARIO
-app.post('/business/new', newBusiness);                 // Crear business - Primer paso - usuario 
-app.post('/business/configuration', configureBusiness); // Configuracion basica Business - Segundo paso - Usuario
-app.post('/business/contact/', addContactInformationBusiness); // Configuracion de contacto - Tercero
-
-  // NUEVO ORIGEN
-  app.post('/business/post/origin/new', newOrigin);     // Nuevo Origen
-  // NUEVO PROSPECTO
-  app.post('/business/post/prospect', newProspect); // Nuevo prospecto
-  // INVITACION
-app.post('/business/invitation', sendInvitation);       // Enviar invitacion a participar a un usuario. 
-  // CONTACTOS Y GRUPOS
-app.post('/business/groupContact', newGroup);           // Nuevo grupo de contactos dentro del business.
-app.post('/business/client/new', newClient);            // Nuevo cliente.
-
-  // NUEVO CLIENTE - TRANSICCION DE PROSPECTO
-  app.post('/business/clientes/new', newClientBusiness) // Nuevo cliente.
-  // NUEVO PROJECT
-  app.post('/client/app/post/newProject', newProject);
-  // NOTA PROYECTO
-  app.post('/client/app/post/note/', newNoteProgress);  // Nota de avance en un proyecto
-
-// RUTAS PUT
-app.put('/user/invitation', responseInvitation);      // Actualizamos invitacion desde el usuario
-
-  // ACTUALIZAR LLAMADAS DE PROSPECTO
-  app.put('/business/prospect/calls/:BId/:PId', dontCall) // Funcion cuando no contestaron
-  // ENVIAMOS PROSPECTO A BANDEJA "PARA DESPUES" O "PERDIDOS"
-  app.put('/business/prospect/bandeja/:PId/:state', neverCall);
-  // La llamada resulto exitosa
-  app.put('/business/prospect/called/:PId', called);
+// CALENDARIO
+        app.get('/calendario/get/all', getCalendaryAll);
+// POST
+app.post('/fuente/post/new', newFuente);
+app.post('/client/post/new', newClient);
 
 
-  // RUTAS DELETE
-app.delete('/business/contact', deleteContact);       // Eliminar contacto.
+// TODO
+app.get('/clients/get/all/panel', getClientsByState);
+app.get('/clients/get/all/intentos', getAllIntentos);
+app.get('/clients/get/all/contactos', getAllContactos);
+app.get('/clients/get/all/visitas', getAllVisitas);
+app.get('/clients/get/all/cotizaciones', getAllCotizaciones);
+app.get('/clients/get/all/aprobadas', getAllAprobadas);
+
+
+
+// ---------------------------------------
+// INTENTOS ------------------------------
+// ---------------------------------------
+app.put('/intentos/put/dontCall/', dontCallIntentos);
+app.put('/intentos/put/contestoSinInteres', contestoSinInteres);
+app.put('/intentos/put/contestoPeroLlamarLuego', contestoPeroLlamarDespues); // LLAMAR DESPUES
+app.put('/intentos/put/contestoYTieneInteresReal', contestoYTieneInteresReal); // INTERES REAL
+
+
+// ---------------------------------------
+// INTENTOS ------------------------------
+// ---------------------------------------
+app.put('/contacto/put/dontCall', dontCallContacto);
+app.put('/contacto/put/contestoPeroLlamarLuego', contestoPeroLlamarDespuesContacto); // Contesto pero llamar despues
+app.put('/contacto/put/contestoPeroSinInteres', contestoSinInteresContacto); // Contesto pero sin interes
+app.put('/contacto/put/contestoYTieneInteresRealContacto', contestoYTieneInteresRealContacto); // INTERES REAL
+
+
+// ---------------------------------------
+// VISITA --------------------------------
+// ---------------------------------------
+
+app.put('/visita/put/contestoPeroSinInteres', contestoSinInteresVisita); // Costesto sin interes
+app.put('/visita/put/llamarDespues', contestoPeroLlamarDespuesVisita);  // Visita lugar llamar
+app.put('/visita/put/otroServicio', deseaOtroServicio);     // Desea otro servicio
+app.put('/visita/put/VisitaACotizacion', visitaACotizacion); // VISTA A COTIZACION
+
+
+
+// ---------------------------------------
+// COTIZACION --------------------------------
+// ---------------------------------------
+
+app.put('/cotizacion/put/cambiarEstado', changeStateToCotizacion); // CAMBIAR ESTADO DE COTIZACION
+app.put('/cotizacion/put/aplazarEstado', aplazarCotizacion); // CAMBIAR ESTADO DE COTIZACION
+
+
+
+
+
+
+
+
+
+
 const server = app.listen(PORT, () => {
     db.sync();
     console.log(`Server running on port ${PORT}`);
