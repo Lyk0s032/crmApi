@@ -7,7 +7,7 @@ const modelCalendario = require('./model/calendary'); // Calendario
 const modelClient = require('./model/client');       // Clientes
 const modelRegistro = require('./model/register'); // Modelo registro
 const modelCotizacion = require('./model/cotizacion'); // Modelo registro
-
+const modelMeta = require('./model/meta');             // Meta
 
 const entorno = true; 
 
@@ -27,7 +27,8 @@ modelClient(sequelize);              // Cliente
 modelCalendario(sequelize);          // Calendario
 modelRegistro(sequelize);            // Registro
 modelCotizacion(sequelize);         // Cotizacion
-const { user, fuente, client, calendario, register, cotizacion } = sequelize.models;
+modelMeta(sequelize);               // Meta
+const { user, fuente, client, calendario, register, cotizacion, meta } = sequelize.models;
 
 
 
@@ -38,6 +39,10 @@ client.belongsTo(fuente);
 // Relacionamos los clientes con los asesores
 user.hasMany(client);
 client.belongsTo(fuente);
+
+// Usuario, meta...
+user.hasOne(meta);
+meta.belongsTo(user); 
 
 client.hasMany(calendario);
 calendario.belongsTo(client);

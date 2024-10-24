@@ -3,8 +3,10 @@ const bodyParser = require('body-parser');
 const {Sequelize,  DataTypes, INTEGER } = require('sequelize');
 
 const {db, Op } = require('./srcEvolution/db/db');
-const { getAllClients, newFuente, newClient, dontCallIntentos, contestoSinInteres, contestoPeroLlamarDespues, contestoYTieneInteresReal, dontCallContacto, contestoPeroLlamarDespuesContacto, contestoSinInteresContacto, contestoYTieneInteresRealContacto, contestoSinInteresVisita, contestoPeroLlamarDespuesVisita, deseaOtroServicio, visitaACotizacion, changeStateToCotizacion, aplazarCotizacion, getClientsByState, getAllIntentos, getAllContactos, getAllVisitas, getAllCotizaciones, getCalendaryAll, getAllAprobadas } = require('./srcEvolution/controllers/client');
+const { getAllClients, newFuente, newClient, dontCallIntentos, contestoSinInteres, contestoPeroLlamarDespues, contestoYTieneInteresReal, dontCallContacto, contestoPeroLlamarDespuesContacto, contestoSinInteresContacto, contestoYTieneInteresRealContacto, contestoSinInteresVisita, contestoPeroLlamarDespuesVisita, deseaOtroServicio, visitaACotizacion, changeStateToCotizacion, aplazarCotizacion, getClientsByState, getAllIntentos, getAllContactos, getAllVisitas, getAllCotizaciones, getCalendaryAll, getAllAprobadas, getClientsByStateByAsesor, getAllContactosByAsesor, getAllVisitasByAsesor, getAllCotizacionesByAsesor, getAllAprobadasByAsesor } = require('./srcEvolution/controllers/client');
 const { getCalendary } = require('./srcEvolution/controllers/calendary');
+const { signIn, signUp } = require('./srcEvolution/controllers/user');
+const isAuthenticated = require('./srcEvolution/controllers/authentication');
 
 const app = express();
 app.use(express.json()); 
@@ -27,6 +29,17 @@ app.get('/', (req, res)  => {
     res.send('Running CRM');
 })
 
+// Usuarios - vendedores.
+app.get('/app/signIn/', isAuthenticated, async (req, res) => {
+  try {
+      console.log(req.user);
+      res.status(200).json({user: req.user});
+  }catch(err){
+    console.log(err);
+    res.status(500).json({msg: 'error en la principal'});
+  }
+})
+
 // GET
 app.get('/clients/get/all/', getAllClients);
 
@@ -36,14 +49,29 @@ app.get('/clients/get/all/', getAllClients);
 app.post('/fuente/post/new', newFuente);
 app.post('/client/post/new', newClient);
 
+app.post('/user/signIn', signIn);       // Iniciar sesion
+app.post('/user/signUp', signUp);       // Crear cuenta - USUARIO
+
+
 
 // TODO
 app.get('/clients/get/all/panel', getClientsByState);
+app.get('/clients/get/all/panel/:asesorId', getClientsByStateByAsesor); // Asesor
+
 app.get('/clients/get/all/intentos', getAllIntentos);
 app.get('/clients/get/all/contactos', getAllContactos);
+app.get('/clients/get/all/contactos/:asesorId', getAllContactosByAsesor);
+
 app.get('/clients/get/all/visitas', getAllVisitas);
+app.get('/clients/get/all/visitas/:asesorId', getAllVisitasByAsesor);
+
+
 app.get('/clients/get/all/cotizaciones', getAllCotizaciones);
+app.get('/clients/get/all/cotizaciones/:asesorId', getAllCotizacionesByAsesor); 
+
 app.get('/clients/get/all/aprobadas', getAllAprobadas);
+app.get('/clients/get/all/aprobadas/:asesorId', getAllAprobadasByAsesor);
+
 
 
 

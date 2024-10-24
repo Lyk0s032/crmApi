@@ -1,5 +1,5 @@
 const express = require('express');
-const { client, user, calendario, fuente, cotizacion, register, Op, Sequelize} = require('../db/db');
+const { client, user, calendario, fuente, cotizacion, register, meta, Op, Sequelize} = require('../db/db');
 
 
 module.exports = {
@@ -96,6 +96,14 @@ module.exports = {
                 return null
             })
 
+            const searchAsesores = await user.findAll({
+                where: {
+                    rango: 'asesor'
+                }, 
+                include:[{
+                    model: meta
+                }]
+            });
             const clients = {
                 intentoOne: searchIntentoOne,
                 intentoTwo: searchIntentoTwo,
@@ -108,7 +116,119 @@ module.exports = {
                 aprobadas: searchCotizacionesAprobadas,
                 espera: searchClientsEspera,
                 perdido: searchClientsPerdido,
-                fuente: searchFuente
+                fuente: searchFuente,
+                asesores: searchAsesores
+            }
+            res.status(200).json(clients);
+        }catch(err){
+            console.log(err);
+            res.status(200).json({msg: 'Ha ocurrido un error en la principal'});
+        }
+    },
+    // POR ASESOR
+    // Buscar clientes y agrupar por intento 1, intento 2, intento 3
+    async getClientsByStateByAsesor(req, res){
+        try{
+            const { asesorId } = req.params;
+            // Realizamos consultas por cada unos de los estados
+
+            // Contacto 1
+            const searchContactOne = await client.findAll({
+                where: {
+                    state: 'contacto 1',
+                    userId: asesorId
+                }
+            }).catch(err => null);
+
+            // Contacto 1
+            const searchContactTwo = await client.findAll({
+                where: {
+                    state: 'contacto 2',
+                    userId: asesorId
+                }
+            }).catch(err => null);
+
+            // Contacto 1
+            const searchContactThree = await client.findAll({
+                where: {
+                    state: 'contacto 3',
+                    userId: asesorId
+                }
+            }).catch(err => null);
+
+            // Visita
+            const searchVisita = await client.findAll({
+                where: {
+                    state: 'visita',
+                    userId: asesorId
+
+                }
+            }).catch(err => null);
+
+            // Cotizacion
+            const searchCotizacion = await client.findAll({
+                where: {
+                    state: 'cotizacion',
+                    userId: asesorId
+
+                }
+            }).catch(err => null);
+
+            const searchCotizacionesAprobadas = await cotizacion.findAll({
+                where: {
+                    state: 'aprobada'
+                },
+                include:[{
+                    model: client,
+                    where:{
+                        userId: asesorId
+                    }
+                }]
+            }).catch(err => null);
+
+            const searchClientsEspera = await client.findAll({
+                where: {
+                    state: 'espera',
+                    userId: asesorId
+                },
+                
+            }).catch(err => null);
+
+            const searchClientsPerdido = await client.findAll({
+                where: {
+                    state: 'perdido',
+                    userId: asesorId
+
+                }
+            }).catch(err => null);
+
+            const searchFuente = await fuente.findAll({
+                where:{
+                    state: 'active'
+                }
+            }).catch(err => {
+                return null
+            })
+
+            const searchAsesores = await user.findAll({
+                where: {
+                    id: asesorId
+                }, 
+                include:[{
+                    model: meta
+                }]
+            });
+            const clients = {
+                contactOne: searchContactOne,
+                contactTwo: searchContactTwo,
+                contactThree: searchContactThree,
+                visitas: searchVisita,
+                cotizacion: searchCotizacion,
+                aprobadas: searchCotizacionesAprobadas,
+                espera: searchClientsEspera,
+                perdido: searchClientsPerdido,
+                fuente: searchFuente,
+                asesor: searchAsesores
             }
             res.status(200).json(clients);
         }catch(err){
@@ -141,7 +261,7 @@ module.exports = {
             res.status(500).json({msg: 'Ha ocurrido un error en la principal'});
         }
     },
-    // Obtener todos los intentos
+    // Obtener todos los Contactos
     async getAllContactos(req, res){
         try{
             const searchContactos = await client.findAll({
@@ -166,12 +286,66 @@ module.exports = {
             res.status(500).json({msg: 'Ha ocurrido un error en la principal'});
         }
     },
+        // Obtener todos los intentos
+    async getAllContactosByAsesor(req, res){
+        try{
+            const { asesorId } = req.params;
+            const searchContactos = await client.findAll({
+                where: {
+                    state: {
+                        [Op.or]: ['contacto 1', 'contacto 2', 'contacto 3'],
+                    },
+                    userId: asesorId
+                },
+                include:[{
+                    model: register
+                },{
+                    model:calendario
+                }]
+            }).catch(err => null);
+    
+        if(!searchContactos) return res.status(404).json({msg: 'No hay'});
+            
+        res.status(201).json(searchContactos);
+    
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'Ha ocurrido un error en la principal'});
+        }
+    },
+
     // GET ALL VISITAS
     async getAllVisitas(req, res){
         try{
             const searchContactos = await client.findAll({
                 where: {
                     state: 'visita'
+                },
+                include:[{
+                    model: register
+                },{
+                    model:calendario
+                }]
+            }).catch(err => null);
+
+        if(!searchContactos) return res.status(404).json({msg: 'No hay'});
+        
+        res.status(201).json(searchContactos);
+
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'Ha ocurrido un error en la principal'});
+        }
+    },
+    // GET ALL VISITAS BY ASESOR
+    async getAllVisitasByAsesor(req, res){
+        try{
+            const { asesorId } = req.params;
+
+            const searchContactos = await client.findAll({
+                where: {
+                    state: 'visita',
+                    userId: asesorId
                 },
                 include:[{
                     model: register
@@ -214,6 +388,34 @@ module.exports = {
             res.status(500).json({msg: 'Ha ocurrido un error en la principal'});
         }
     },
+    // GET ALL COTIZACIONES
+    async getAllCotizacionesByAsesor(req, res){
+        try{
+            const { asesorId } = req.params;
+            const searchContactos = await client.findAll({
+                where: {
+                    state: 'cotizacion',
+                    userId: asesorId
+                },
+                include:[{
+                    model: cotizacion
+                },{
+                    model: register
+                },{
+                    model:calendario
+                }]
+            }).catch(err => null);
+
+        if(!searchContactos) return res.status(404).json({msg: 'No hay'});
+        
+        res.status(201).json(searchContactos);
+
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'Ha ocurrido un error en la principal'});
+        }
+    },
+
      // GET ALL APROBADAS
      async getAllAprobadas(req, res){
         try{
@@ -239,6 +441,33 @@ module.exports = {
             res.status(500).json({msg: 'Ha ocurrido un error en la principal'});
         }
     },
+         // GET ALL APROBADAS
+         async getAllAprobadasByAsesor(req, res){
+            try{
+                const { asesorId } = req.params;
+                const searchContactos = await client.findAll({
+                    where: {
+                        state: 'aprobada',
+                        userId: asesorId
+                    },
+                    include:[{
+                        model: cotizacion
+                    },{
+                        model: register
+                    },{
+                        model:calendario
+                    }]
+                }).catch(err => null);
+    
+            if(!searchContactos) return res.status(404).json({msg: 'No hay'});
+            
+            res.status(201).json(searchContactos);
+    
+            }catch(err){
+                console.log(err);
+                res.status(500).json({msg: 'Ha ocurrido un error en la principal'});
+            }
+        },
     // Obtener Calendario
     async getCalendaryAll(req, res){
         try{

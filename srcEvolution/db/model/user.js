@@ -36,6 +36,9 @@ module.exports = sequelize => {
         // Estado... Activo o innactivo
         state: {
             type: DataTypes.STRING
+        }, // Rango
+        rango: {
+            type: DataTypes.STRING
         }
 
     })
