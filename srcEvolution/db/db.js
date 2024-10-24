@@ -17,9 +17,9 @@ const sequelize = new Sequelize(dburl, {
     logging: false,
     native: false,
 });
-
+  
  
-
+  
 // Modelos
 modelUser(sequelize);                // Usuarios
 modelFuente(sequelize);              // Fuente
