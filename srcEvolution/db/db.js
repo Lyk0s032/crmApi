@@ -9,7 +9,7 @@ const modelRegistro = require('./model/register'); // Modelo registro
 const modelCotizacion = require('./model/cotizacion'); // Modelo registro
 const modelMeta = require('./model/meta');             // Meta
 
-const entorno = true; 
+const entorno = true;
 
 let dburl = entorno ? 'postgresql://postgres:EYsQLfxwLvzqgvSaIZKMRJkThtzFJZpr@postgres.railway.internal:5432/railway' : 'postgres:postgres:123@localhost:5432/crm';
 
