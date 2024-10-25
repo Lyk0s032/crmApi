@@ -11,7 +11,7 @@ const modelMeta = require('./model/meta');             // Meta
 
 const entorno = true;
 
-let dburl = entorno ? 'postgresql://postgres:EYsQLfxwLvzqgvSaIZKMRJkThtzFJZpr@postgres.railway.internal:5432/railway' : 'postgres:postgres:123@localhost:5432/crm';
+let dburl = entorno ? 'postgresql://postgres:bnPJhZabTUEpfiLwGbOSZofFyvfJQrhq@junction.proxy.rlwy.net:30596/railway' : 'postgres:postgres:123@localhost:5432/crm';
 
 const sequelize = new Sequelize(dburl, {
     logging: false,
