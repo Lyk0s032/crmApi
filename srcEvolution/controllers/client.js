@@ -520,12 +520,12 @@ module.exports = {
             const createClient = await client.create({
                 name,
                 phone,
-                nombreEmpresa: nombreEmpresa ? nombreEmpresa : null,
-                url: url ? url : null,
-                fijo: fijo ? fijo : null,
-                rangoEncargado: cargo ? cargo : null,
-                direccion: direccion ? direccion : null,
-                email: email ? email : null,
+                nombreEmpresa: nombreEmpresa,
+                url: url,
+                fijo: fijo,
+                rangoEncargado: cargo,
+                direccion: direccion,
+                email: email,
                 fuenteId,
                 state: 'intento 1'
             }).catch(err => {
