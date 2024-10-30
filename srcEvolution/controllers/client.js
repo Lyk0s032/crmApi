@@ -271,11 +271,17 @@ module.exports = {
                     },
                 },
                 include:[{
+                    model: user,
+                    attributes:['name', 'lastName', 'rango', 'photo']
+                },{
                     model: register
                 },{
                     model:calendario
                 }]
-            }).catch(err => null);
+            }).catch(err => {
+                console.log(err)
+                return null
+            });
 
         if(!searchContactos) return res.status(404).json({msg: 'No hay'});
         
@@ -322,6 +328,9 @@ module.exports = {
                     state: 'visita'
                 },
                 include:[{
+                    model: user,
+                    attributes:['name', 'lastName', 'rango', 'photo']
+                },{
                     model: register
                 },{
                     model:calendario
@@ -504,13 +513,18 @@ module.exports = {
     // Cargar nuevo cliente
     async newClient(req, res){
         try {
-            const { name, phone, email, fuenteId} = req.body;
+            const { name, phone, email, nombreEmpresa, url, fijo, cargo, direccion, fuenteId} = req.body;
             // Validamos
             if(!name || !phone || !fuenteId) return res.status(501).json({msg: 'Parametros invalidos'})
             // Caso contrario
             const createClient = await client.create({
                 name,
                 phone,
+                nombreEmpresa: nombreEmpresa ? nombreEmpresa : null,
+                url: url ? url : null,
+                fijo: fijo ? fijo : null,
+                rangoEncargado: cargo ? cargo : null,
+                direccion: direccion ? direccion : null,
                 email: email ? email : null,
                 fuenteId,
                 state: 'intento 1'
@@ -696,9 +710,9 @@ module.exports = {
     },
     async contestoYTieneInteresReal(req, res){
         try{
-            const { clientId, estado, asesorId, time, tags, nombreEmpresa, responsable, sector, cargo } = req.body;
+            const { clientId, estado, asesorId, time, tags, direccion, url, fijo, nombreEmpresa, responsable, sector, cargo } = req.body;
         
-            if(!clientId || !estado || !time || !nombreEmpresa || !responsable || !sector || !cargo) return res.status(501).json({msg: 'Parametros invalidos'});
+            if(!clientId || !estado || !time || !nombreEmpresa || !responsable || !sector) return res.status(501).json({msg: 'Parametros invalidos'});
             const date = new Date();
             
             // Caso contrario, avanzamos...
@@ -716,6 +730,9 @@ module.exports = {
                 responsable,
                 rangoEncargado: cargo,
                 nombreEmpresa,
+                direccion,
+                fijo,
+                url,
                 state: estado == 'llamada' ? 'contacto 1' : estado == 'visita' ? 'visita' : null,
                 userId: asesorId
             },{

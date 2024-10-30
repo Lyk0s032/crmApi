@@ -38,7 +38,7 @@ client.belongsTo(fuente);
 
 // Relacionamos los clientes con los asesores
 user.hasMany(client);
-client.belongsTo(fuente);
+client.belongsTo(user);
 
 // Usuario, meta...
 user.hasOne(meta);
@@ -52,7 +52,7 @@ calendario.belongsTo(user);
 
 client.hasMany(register);
 register.belongsTo(client);
-
+ 
 client.hasMany(cotizacion);
 cotizacion.belongsTo(client);
 

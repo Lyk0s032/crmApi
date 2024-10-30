@@ -29,6 +29,16 @@ module.exports = sequelize => {
         nombreEmpresa: {
             type: DataTypes.STRING
         },
+        // ACTUALIZACION FELIPE
+        url: {
+            type: DataTypes.STRING
+        },
+        direccion:{
+            type: DataTypes.STRING
+        },
+        fijo: {
+            type: DataTypes.STRING
+        },
         embudo: { // Intento 1, 2, 3 || Contacto 1, 2, 3
             type: DataTypes.STRING
         },
