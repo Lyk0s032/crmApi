@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const {Sequelize,  DataTypes, INTEGER } = require('sequelize');
 
 const {db, Op } = require('./srcEvolution/db/db');
-const { getAllClients, newFuente, newClient, dontCallIntentos, contestoSinInteres, contestoPeroLlamarDespues, contestoYTieneInteresReal, dontCallContacto, contestoPeroLlamarDespuesContacto, contestoSinInteresContacto, contestoYTieneInteresRealContacto, contestoSinInteresVisita, contestoPeroLlamarDespuesVisita, deseaOtroServicio, visitaACotizacion, changeStateToCotizacion, aplazarCotizacion, getClientsByState, getAllIntentos, getAllContactos, getAllVisitas, getAllCotizaciones, getCalendaryAll, getAllAprobadas, getClientsByStateByAsesor, getAllContactosByAsesor, getAllVisitasByAsesor, getAllCotizacionesByAsesor, getAllAprobadasByAsesor } = require('./srcEvolution/controllers/client');
+const { getAllClients, newFuente, newClient, dontCallIntentos, contestoSinInteres, contestoPeroLlamarDespues, contestoYTieneInteresReal, dontCallContacto, contestoPeroLlamarDespuesContacto, contestoSinInteresContacto, contestoYTieneInteresRealContacto, contestoSinInteresVisita, contestoPeroLlamarDespuesVisita, deseaOtroServicio, visitaACotizacion, changeStateToCotizacion, aplazarCotizacion, getClientsByState, getAllIntentos, getAllContactos, getAllVisitas, getAllCotizaciones, getCalendaryAll, getAllAprobadas, getClientsByStateByAsesor, getAllContactosByAsesor, getAllVisitasByAsesor, getAllCotizacionesByAsesor, getAllAprobadasByAsesor, VisualizarAsesor } = require('./srcEvolution/controllers/client');
 const { getCalendary } = require('./srcEvolution/controllers/calendary');
 const { signIn, signUp } = require('./srcEvolution/controllers/user');
 const isAuthenticated = require('./srcEvolution/controllers/authentication');
@@ -61,6 +61,10 @@ app.get('/clients/get/all/panel/:asesorId', getClientsByStateByAsesor); // Aseso
 app.get('/clients/get/all/intentos', getAllIntentos);
 app.get('/clients/get/all/contactos', getAllContactos);
 app.get('/clients/get/all/contactos/:asesorId', getAllContactosByAsesor);
+
+// VISUALIZAR ASESORES
+app.get('/clients/get/visualizar/asesores/:asesorId', VisualizarAsesor);
+// CERRAR VISUALIZACION DE DATOS
 
 app.get('/clients/get/all/visitas', getAllVisitas);
 app.get('/clients/get/all/visitas/:asesorId', getAllVisitasByAsesor);
