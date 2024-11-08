@@ -1,6 +1,6 @@
 const express = require('express');
-const { client, user, calendario, fuente, cotizacion, register, meta, Op, Sequelize} = require('../db/db');
-
+const { client, user, calendario, fuente, cotizacion, register, meta, Op} = require('../db/db');
+const {  Sequelize } = require('sequelize');
 
 module.exports = {
     // Buscar clientes y agrupar por intento 1, intento 2, intento 3
@@ -234,6 +234,48 @@ module.exports = {
         }catch(err){
             console.log(err);
             res.status(200).json({msg: 'Ha ocurrido un error en la principal'});
+        }
+    },
+
+    // BUSCADOR DE CLIENTES
+    async SearchClients(req, res){
+        try{
+            const { query } = req.query; // Captura el parámetro 'query' de la URL
+
+            // Verifica que se haya enviado un término de búsqueda
+            if (!query) {
+                return res.status(400).json({ message: 'Debes ingresar un término de búsqueda' });
+            }
+
+            // Realiza la búsqueda en la base de datos
+            const resultados = await client.findAll({
+                where: {
+                    nombreEmpresa: {
+                        [Op.iLike]: `%${query}%` // Usamos iLike para hacer una búsqueda insensible a mayúsculas/minúsculas
+                    }
+                },
+                limit: 10 // Limita la cantidad de resultados si lo deseas
+            }).catch(err => null);
+
+            // Enviamos respuesta si no hay resultado
+            // Filtra en el servidor para obtener solo un registro por cada nombre
+            const resultadosUnicos = [];
+            const nombresVistos = new Set();
+
+            for (const producto of resultados) {
+                if (!nombresVistos.has(producto.nombreEmpresa)) {
+                    nombresVistos.add(producto.nombreEmpresa);
+                    resultadosUnicos.push(producto); // Guarda el primer registro con nombre único
+                }
+            }
+
+            // Limita la cantidad de resultados únicos que se envían al cliente
+            if(!resultados.length) return res.status(404).json({msg:'No hay resultados'})
+            res.json(resultadosUnicos.slice(0, 10));
+
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'Ha ocurrido un error en la principal.'});
         }
     },
     // PARA QUE EL LIDER PUEDA VISUALIZAR
@@ -1321,8 +1363,6 @@ module.exports = {
                 return null
             });
 
-
-
                 const updateClient = await client.update({
                     state: 'cotizacion'
                 }, {
@@ -1367,8 +1407,174 @@ module.exports = {
         }
     },
 
+    // Crear directamente cotizacion.
+    async createClientAndCotizacion(req, res){
+        try{
+            const { userId, name, phone, email, nombreEmpresa, url, fijo, cargo, direccion, fuenteId, 
+                nit, nro, fecha, bruto, descuento, iva, neto
+            } = req.body;
+
+            // Validamos
+            if(!userId || !name || !phone || !fuenteId) return res.status(501).json({msg: 'Parametros invalidos'})
+            // Caso contrario
+            const createClient = await client.create({
+                name,
+                phone,
+                nombreEmpresa: nombreEmpresa,
+                url: url,
+                fijo: fijo,
+                rangoEncargado: cargo,
+                direccion: direccion,
+                email: email,
+                fuenteId,
+                userId: userId,
+                state: 'cotizacion'
+            }).then(async (res) => {
+                    console.log(res);
+
+                    const createCotizacion = await cotizacion.create({
+                        nit, 
+                        nro, 
+                        fecha, 
+                        bruto,   
+                        descuento, 
+                        iva, 
+                        neto,
+                        clientId: res.id,
+                        state: 'pendiente'
+                    }).catch(err => {
+                        console.log(err);
+                        return null
+                    }); 
+
+                    return res
+            })
+            .catch(err => {
+                console.log(err);
+                return null;
+            });
+
+            if(!createClient) return res.status(502).json({msg: 'Ha ocurrido un error en la principal.'});
+
+            res.status(201).json(createClient);
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'Ha ocurrido un error en la principal.'});
+        }
+    },
+
+    // DELETE CLIENT
+    async DeleteClient(req, res){
+        try{
+            // Recibimos id por body.
+            const { clientId } = req.params;
+
+            if(!clientId) return res.status(501).json({msg: 'Parametro invalido'});
+            // Caso contrario, avanzamos
+            const removeCoti = await cotizacion.destroy({
+                where: { clientId: clientId }
+            })
+            .catch(err => {
+                console.log(err)
+                return null
+            });
+
+            const removeTime = await calendario.destroy({
+                where: { clientId: clientId}
+            }).catch(err => null);
 
 
+            const remove = await client.destroy({
+                where: {
+                    id: clientId
+                }
+            }).catch(err => {
+                console.log(err)
+                return null
+            });
+
+            
+
+            
+            if(!remove) return res.status(401).json({msg: 'no ha sido posible'});
+            res.status(200).json({msg: 'Elimindo'})
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'HA ocurrido un error en la principal'});
+        }
+    },
+    // Actualizar informacion del cliente
+    async UpdateCliente(req, res){
+        try{
+            // Recibimos datos por body
+            const { clientId, name, phone, email, nombreEmpresa, url, fijo, cargo, direccion } = req.body;
+            // Validamos datos por body
+            if(!name || !phone) return res.status(501).json({msg: 'Parametros no validos'});
+        
+            // Caso contrario, avanzamos
+            const updateClient = await client.update({
+                name,
+                phone,
+                email,
+                nombreEmpresa,
+                url,
+                fijo,
+                rangoEncargado:cargo,
+                direccion,
+            }, {
+                where: {
+                    id: clientId
+                }
+            }).catch(err => {
+                console.log(err);
+                return null;
+            })
+
+            if(!updateClient) return res.status(502).json({msg: 'No hemos podido actualizar esto.'});
+            // Caso contrario
+            res.status(201).json({msg: 'Actualizado con exito'});
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'Ha ocurrido un error en la principal.'});
+        }
+    },
+    // CAMBIAR DE ASESOR
+    async ChangeClientOfAsesor(req, res){
+        try{
+            // Recibimos datos por body.
+            const { asesorId, clientId } = req.body;
+
+            // Enviamos señal.
+            if(!asesorId || !clientId) return res.status(501).json({msg: 'Los parametros no son validos.'});
+
+            // Avanzamos
+            // Actualizamos cliente.
+            const updateClient = await client.update({
+                userId: asesorId,
+                
+            }, {
+                where: {
+                    id: clientId
+                }
+            }).catch(err => null);
+
+            const updateCalendario = await calendario.update({
+                userId: asesorId,
+                
+            }, {
+                where: {
+                    id: clientId
+                }
+            }).catch(err => null);
+
+            if(!updateClient) return res.status(502).json({msg: 'Ha ocurrido un error en la principal.'});
+
+            res.status(200).json({msg: 'Actualizado con exito'})
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'Ha ocurrido un error en la principal.'})
+        }
+    },
     // CAMBIAR COTIZACION A APROBADA O PERDIDA
     async changeStateToCotizacion(req, res){
         try{

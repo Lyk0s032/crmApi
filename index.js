@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const {Sequelize,  DataTypes, INTEGER } = require('sequelize');
 
 const {db, Op } = require('./srcEvolution/db/db');
-const { getAllClients, newFuente, newClient, dontCallIntentos, contestoSinInteres, contestoPeroLlamarDespues, contestoYTieneInteresReal, dontCallContacto, contestoPeroLlamarDespuesContacto, contestoSinInteresContacto, contestoYTieneInteresRealContacto, contestoSinInteresVisita, contestoPeroLlamarDespuesVisita, deseaOtroServicio, visitaACotizacion, changeStateToCotizacion, aplazarCotizacion, getClientsByState, getAllIntentos, getAllContactos, getAllVisitas, getAllCotizaciones, getCalendaryAll, getAllAprobadas, getClientsByStateByAsesor, getAllContactosByAsesor, getAllVisitasByAsesor, getAllCotizacionesByAsesor, getAllAprobadasByAsesor, VisualizarAsesor } = require('./srcEvolution/controllers/client');
+const { getAllClients, newFuente, newClient, dontCallIntentos, contestoSinInteres, contestoPeroLlamarDespues, contestoYTieneInteresReal, dontCallContacto, contestoPeroLlamarDespuesContacto, contestoSinInteresContacto, contestoYTieneInteresRealContacto, contestoSinInteresVisita, contestoPeroLlamarDespuesVisita, deseaOtroServicio, visitaACotizacion, changeStateToCotizacion, aplazarCotizacion, getClientsByState, getAllIntentos, getAllContactos, getAllVisitas, getAllCotizaciones, getCalendaryAll, getAllAprobadas, getClientsByStateByAsesor, getAllContactosByAsesor, getAllVisitasByAsesor, getAllCotizacionesByAsesor, getAllAprobadasByAsesor, VisualizarAsesor, createClientAndCotizacion, DeleteClient, ChangeClientOfAsesor, SearchClients, UpdateCliente } = require('./srcEvolution/controllers/client');
 const { getCalendary } = require('./srcEvolution/controllers/calendary');
 const { signIn, signUp } = require('./srcEvolution/controllers/user');
 const isAuthenticated = require('./srcEvolution/controllers/authentication');
@@ -42,7 +42,7 @@ app.get('/app/signIn/', isAuthenticated, async (req, res) => {
 
 // GET
 app.get('/clients/get/all/', getAllClients);
-
+app.get('/clients/get/searchClients', SearchClients);
 // CALENDARIO
         app.get('/calendario/get/all', getCalendaryAll);
 // POST
@@ -51,9 +51,16 @@ app.post('/client/post/new', newClient);
 
 app.post('/user/signIn', signIn);       // Iniciar sesion
 app.post('/user/signUp', signUp);       // Crear cuenta - USUARIO
+  // CREAR CLIENTE Y COTIZACION AL MiSMO TIEMPO
+  app.post('/client/post/newAndCotizacion', createClientAndCotizacion);
 
+  // DELETE
+  app.delete('/client/delete/registro/:clientId', DeleteClient); // Eliminar cliente
+  // PUT
+  app.put('/client/put/update', UpdateCliente); // Actualizar cliente
+  app.put('/client/put/changeAsesor', ChangeClientOfAsesor); // Cambiar cliente de asesor
 
-
+ 
 // TODO
 app.get('/clients/get/all/panel', getClientsByState);
 app.get('/clients/get/all/panel/:asesorId', getClientsByStateByAsesor); // Asesor

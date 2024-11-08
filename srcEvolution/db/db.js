@@ -44,16 +44,16 @@ client.belongsTo(user);
 user.hasOne(meta);
 meta.belongsTo(user); 
 
-client.hasMany(calendario);
+client.hasMany(calendario, { onDelete: 'CASCADE' });
 calendario.belongsTo(client);
 
 user.hasMany(calendario);
 calendario.belongsTo(user);
 
-client.hasMany(register);
+client.hasMany(register, { onDelete: 'CASCADE' });
 register.belongsTo(client);
  
-client.hasMany(cotizacion);
+client.hasMany(cotizacion, { onDelete: 'CASCADE' });
 cotizacion.belongsTo(client);
 
 // Exportamos.
