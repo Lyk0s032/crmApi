@@ -664,8 +664,9 @@ module.exports = {
             const searchCaledario = await calendario.findAll({
                 include:[{
                     model:client,
-                }, {
-                    model: user
+                    include: [{
+                        model:user
+                    }]
                 }],
                 order: [['fecha', 'DESC']]
             }).catch(err => {
