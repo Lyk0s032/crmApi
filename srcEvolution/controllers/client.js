@@ -563,6 +563,8 @@ module.exports = {
                 include:[{
                     model: cotizacion
                 },{
+                    model: user
+                },{
                     model: register
                 },{
                     model:calendario
