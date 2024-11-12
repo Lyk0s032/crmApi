@@ -453,7 +453,7 @@ module.exports = {
                 },
                 include:[{
                     model: user,
-                    attributes:['name', 'lastName', 'rango', 'photo']
+                    attributes:['id','name', 'lastName', 'rango', 'photo']
                 },{
                     model: register
                 },{
@@ -510,7 +510,7 @@ module.exports = {
                 },
                 include:[{
                     model: user,
-                    attributes:['name', 'lastName', 'rango', 'photo']
+                    attributes:['id','name', 'lastName', 'rango', 'photo']
                 },{
                     model: register
                 },{
@@ -1641,7 +1641,8 @@ module.exports = {
             if(!clientId ) return res.status(501).json({msg: 'Parametros invalidos'});
             const date = new Date();
             
-          
+            const fechaAplazada = new Date(new Date(date).setDate(date.getDate() + 8))
+            
             // Caso contrario, avanzamos...
              // Buscamos client
              const searchClient = await client.findOne({
@@ -1682,10 +1683,16 @@ module.exports = {
                         console.log(err);
                         return null;
                     })
+                    
+                    const nuevoTiempo = await calendario.create({
+                        type: `Cotizacion aplazada`,
+                        fecha: `${fechaAplazada.getMonth() + 1}-${fechaAplazada.getDate()}-${fechaAplazada.getFullYear()}`,
+                        clientId: searchClient.id
+    
+                    }).catch(err => null);
     
                     return res
                 })
-
                 res.status(201).json({msg: 'Aplazamos la fecha de la cotizacion 7 dias!'});
 
 
@@ -1694,4 +1701,126 @@ module.exports = {
             return res.status(500).json({msg: 'Error principal.'});
         }
     },
+
+
+     // Obtener en lista de espera
+     async getClientsOnEspera(req, res){
+        try {
+        
+            const searchContactos = await client.findAll({
+                where: {
+                    state: 'espera',
+                },
+                include:[{
+                    model: user,
+                    attributes:['name', 'lastName', 'rango', 'photo']
+                },{
+                    model: cotizacion
+                },{
+                    model: register
+                },{
+                    model:calendario
+                }],
+                order: [[register, 'createdAt', 'DESC']]
+            }).catch(err => null);
+
+        if(!searchContactos) return res.status(404).json({msg: 'No hay'});
+        
+        res.status(201).json(searchContactos);
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'Error en la principal.'});
+        }
+    },
+    // Obtener en lista de espera
+    async getClientsOnEsperaByAsesor(req, res){
+        try {
+            const { asesorId } = req.params;
+            if(!asesorId) return res.status(501).json({msg: 'Los parametros no son validos.'});
+        
+            const searchContactos = await client.findAll({
+                where: {
+                    state: 'espera',
+                    userId: asesorId
+                },
+                include:[{
+                    model: cotizacion
+                },{
+                    model: register
+                },{
+                    model:calendario
+                }],
+                order: [[register, 'createdAt', 'DESC']]
+            }).catch(err => null);
+
+        if(!searchContactos) return res.status(404).json({msg: 'No hay'});
+        
+        res.status(201).json(searchContactos);
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'Error en la principal.'});
+        }
+    },
+
+    // PERDIDO
+    
+     // Obtener en lista de espera
+     async getClientsOnPerdidoEspera(req, res){
+        try {
+        
+            const searchContactos = await client.findAll({
+                where: {
+                    state: 'perdido',
+                },
+                include:[{
+                    model: user,
+                    attributes:['name', 'lastName', 'rango', 'photo']
+                },{
+                    model: cotizacion
+                },{
+                    model: register
+                },{
+                    model:calendario
+                }],
+                order: [[register, 'createdAt', 'DESC']]
+            }).catch(err => null);
+
+        if(!searchContactos) return res.status(404).json({msg: 'No hay'});
+        
+        res.status(201).json(searchContactos);
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'Error en la principal.'});
+        }
+    },
+    
+    // Obtener en lista de espera
+    async getClientsOnPerdidoByAsesor(req, res){
+        try {
+            const { asesorId } = req.params;
+            if(!asesorId) return res.status(501).json({msg: 'Los parametros no son validos.'});
+        
+            const searchContactos = await client.findAll({
+                where: {
+                    state: 'perdido',
+                    userId: asesorId
+                },
+                include:[{
+                    model: cotizacion
+                },{
+                    model: register
+                },{
+                    model:calendario
+                }],
+                order: [[register, 'createdAt', 'DESC']]
+            }).catch(err => null);
+
+        if(!searchContactos) return res.status(404).json({msg: 'No hay'});
+        
+        res.status(201).json(searchContactos);
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'Error en la principal.'});
+        }
+    }
 }

@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const {Sequelize,  DataTypes, INTEGER } = require('sequelize');
 
 const {db, Op } = require('./srcEvolution/db/db');
-const { getAllClients, newFuente, newClient, dontCallIntentos, contestoSinInteres, contestoPeroLlamarDespues, contestoYTieneInteresReal, dontCallContacto, contestoPeroLlamarDespuesContacto, contestoSinInteresContacto, contestoYTieneInteresRealContacto, contestoSinInteresVisita, contestoPeroLlamarDespuesVisita, deseaOtroServicio, visitaACotizacion, changeStateToCotizacion, aplazarCotizacion, getClientsByState, getAllIntentos, getAllContactos, getAllVisitas, getAllCotizaciones, getCalendaryAll, getAllAprobadas, getClientsByStateByAsesor, getAllContactosByAsesor, getAllVisitasByAsesor, getAllCotizacionesByAsesor, getAllAprobadasByAsesor, VisualizarAsesor, createClientAndCotizacion, DeleteClient, ChangeClientOfAsesor, SearchClients, UpdateCliente } = require('./srcEvolution/controllers/client');
+const { getAllClients, newFuente, newClient, dontCallIntentos, contestoSinInteres, contestoPeroLlamarDespues, contestoYTieneInteresReal, dontCallContacto, contestoPeroLlamarDespuesContacto, contestoSinInteresContacto, contestoYTieneInteresRealContacto, contestoSinInteresVisita, contestoPeroLlamarDespuesVisita, deseaOtroServicio, visitaACotizacion, changeStateToCotizacion, aplazarCotizacion, getClientsByState, getAllIntentos, getAllContactos, getAllVisitas, getAllCotizaciones, getCalendaryAll, getAllAprobadas, getClientsByStateByAsesor, getAllContactosByAsesor, getAllVisitasByAsesor, getAllCotizacionesByAsesor, getAllAprobadasByAsesor, VisualizarAsesor, createClientAndCotizacion, DeleteClient, ChangeClientOfAsesor, SearchClients, UpdateCliente, getClientsOnEsperaByAsesor, getClientsOnEspera, getClientsOnPerdidoEspera, getClientsOnPerdidoByAsesor } = require('./srcEvolution/controllers/client');
 const { getCalendary } = require('./srcEvolution/controllers/calendary');
 const { signIn, signUp } = require('./srcEvolution/controllers/user');
 const isAuthenticated = require('./srcEvolution/controllers/authentication');
@@ -82,8 +82,14 @@ app.get('/clients/get/all/cotizaciones/:asesorId', getAllCotizacionesByAsesor);
 
 app.get('/clients/get/all/aprobadas', getAllAprobadas);
 app.get('/clients/get/all/aprobadas/:asesorId', getAllAprobadasByAsesor);
+// ESPERA
+app.get('/clients/get/all/espera/:asesorId', getClientsOnEsperaByAsesor) // CLIENTES EN ESPERA POR ASESOR
+app.get('/clients/get/all/espera/', getClientsOnEspera); // CLIENTES EN ESPERA
 
 
+// ESPERA
+app.get('/clients/get/all/perdido/:asesorId', getClientsOnPerdidoByAsesor) // CLIENTES EN ESPERA POR ASESOR
+app.get('/clients/get/all/perdido/', getClientsOnPerdidoEspera); // CLIENTES EN ESPERA
 
 
 // ---------------------------------------
