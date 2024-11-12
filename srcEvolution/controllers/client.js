@@ -665,8 +665,6 @@ module.exports = {
                 include:[{
                     model:client,
                 }, {
- 
-                }, {
                     model: user
                 }],
                 order: [['fecha', 'DESC']]
