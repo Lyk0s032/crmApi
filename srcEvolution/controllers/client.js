@@ -1556,7 +1556,10 @@ module.exports = {
                 where: {
                     id: clientId
                 }
-            }).catch(err => null);
+            }).catch(err => {
+                console.log(err)
+                return null
+            });
 
             const updateCalendario = await calendario.update({
                 userId: asesorId,
