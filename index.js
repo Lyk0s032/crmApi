@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const {Sequelize,  DataTypes, INTEGER } = require('sequelize');
 
 const {db, Op } = require('./srcEvolution/db/db');
-const { getAllClients, newFuente, newClient, dontCallIntentos, contestoSinInteres, contestoPeroLlamarDespues, contestoYTieneInteresReal, dontCallContacto, contestoPeroLlamarDespuesContacto, contestoSinInteresContacto, contestoYTieneInteresRealContacto, contestoSinInteresVisita, contestoPeroLlamarDespuesVisita, deseaOtroServicio, visitaACotizacion, changeStateToCotizacion, aplazarCotizacion, getClientsByState, getAllIntentos, getAllContactos, getAllVisitas, getAllCotizaciones, getCalendaryAll, getAllAprobadas, getClientsByStateByAsesor, getAllContactosByAsesor, getAllVisitasByAsesor, getAllCotizacionesByAsesor, getAllAprobadasByAsesor, VisualizarAsesor, createClientAndCotizacion, DeleteClient, ChangeClientOfAsesor, SearchClients, UpdateCliente, getClientsOnEsperaByAsesor, getClientsOnEspera, getClientsOnPerdidoEspera, getClientsOnPerdidoByAsesor } = require('./srcEvolution/controllers/client');
+const { getAllClients, newFuente, newClient, dontCallIntentos, contestoSinInteres, contestoPeroLlamarDespues, contestoYTieneInteresReal, dontCallContacto, contestoPeroLlamarDespuesContacto, contestoSinInteresContacto, contestoYTieneInteresRealContacto, contestoSinInteresVisita, contestoPeroLlamarDespuesVisita, deseaOtroServicio, visitaACotizacion, changeStateToCotizacion, aplazarCotizacion, getClientsByState, getAllIntentos, getAllContactos, getAllVisitas, getAllCotizaciones, getCalendaryAll, getAllAprobadas, getClientsByStateByAsesor, getAllContactosByAsesor, getAllVisitasByAsesor, getAllCotizacionesByAsesor, getAllAprobadasByAsesor, VisualizarAsesor, createClientAndCotizacion, DeleteClient, ChangeClientOfAsesor, SearchClients, UpdateCliente, getClientsOnEsperaByAsesor, getClientsOnEspera, getClientsOnPerdidoEspera, getClientsOnPerdidoByAsesor, getAllClientsVisualizar, SearchClientsParaVisualizar } = require('./srcEvolution/controllers/client');
 const { getCalendary } = require('./srcEvolution/controllers/calendary');
 const { signIn, signUp } = require('./srcEvolution/controllers/user');
 const isAuthenticated = require('./srcEvolution/controllers/authentication');
@@ -43,6 +43,11 @@ app.get('/app/signIn/', isAuthenticated, async (req, res) => {
 // GET
 app.get('/clients/get/all/', getAllClients);
 app.get('/clients/get/searchClients', SearchClients);
+
+// GET
+app.get('/client/get/all/visualizar', getAllClientsVisualizar);
+app.get('/clients/get/searchClientsAll', SearchClientsParaVisualizar);
+
 // CALENDARIO
         app.get('/calendario/get/all', getCalendaryAll);
 // POST
@@ -87,7 +92,7 @@ app.get('/clients/get/all/espera/:asesorId', getClientsOnEsperaByAsesor) // CLIE
 app.get('/clients/get/all/espera/', getClientsOnEspera); // CLIENTES EN ESPERA
 
 
-// ESPERA
+// PERDIDO
 app.get('/clients/get/all/perdido/:asesorId', getClientsOnPerdidoByAsesor) // CLIENTES EN ESPERA POR ASESOR
 app.get('/clients/get/all/perdido/', getClientsOnPerdidoEspera); // CLIENTES EN ESPERA
 

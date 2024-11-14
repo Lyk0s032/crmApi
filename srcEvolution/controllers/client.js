@@ -236,8 +236,144 @@ module.exports = {
             res.status(200).json({msg: 'Ha ocurrido un error en la principal'});
         }
     },
+    // GET ALL CLIENTES ON PANEL
+    async getAllClientsVisualizar(req, res){
+        try{
+            const { asesorId, page, query}  = req.query;
+            const pageSize = 10;
 
-    // BUSCADOR DE CLIENTES
+            if(!asesorId){
+                const results = await client.findAndCountAll({
+                    include:[{
+                        model: cotizacion
+                    },{
+                        model: register
+                    },{
+                        model:calendario
+                    }, {
+                        model: user
+                    }],
+                    limit: pageSize,
+                    offset: (page - 1) * pageSize,
+                    order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
+                }).catch(err => {
+                    console.log(err);
+                    return null
+                });
+                res.status(200).json(results);     
+
+
+            }else{
+
+
+                const results = await client.findAndCountAll({
+                    where: {
+                        userId: asesorId
+                    },
+                    include:[{
+                        model: cotizacion
+                    },{
+                        model: register
+                    },{
+                        model:calendario
+                    }, {
+                        model: user
+                    }],
+                    limit: pageSize,
+                    offset: (page - 1) * pageSize,
+                    order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
+               
+                }).catch(err => {
+                    console.log(err);
+                    return null
+                });
+                res.status(200).json(results);     
+
+
+            }
+
+        }catch(err){        
+            console.log(err);
+            res.status(500).json({msg: 'Ha ocurrido un error en la principal para buscar.'});
+        }
+    },
+    // BUSCAR DE CLIENTES
+        async SearchClientsParaVisualizar(req, res){
+            try{
+                const { query, asesor } = req.query; // Captura el parámetro 'query' de la URL
+    
+                // Verifica que se haya enviado un término de búsqueda
+                if (!query) {
+                    return res.status(400).json({ message: 'Debes ingresar un término de búsqueda' });
+                }
+                if(!asesor){
+                // Realiza la búsqueda en la base de datos
+                const resultados = await client.findAll({
+                    where: {
+                        nombreEmpresa: {
+                            [Op.iLike]: `%${query}%` // Usamos iLike para hacer una búsqueda insensible a mayúsculas/minúsculas
+                        }
+                    },
+                    include:[{
+                        model: cotizacion
+                    },{
+                        model: register
+                    },{
+                        model:calendario
+                    },{
+                        model: user
+                    }],
+                    order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']],
+
+                    limit: 10 // Limita la cantidad de resultados si lo deseas
+                }).catch(err => {
+                    console.log(err);
+                    return null
+                });
+    
+                // Enviamos respuesta si no hay resultado
+            
+                if(!resultados || !resultados.length) return res.status(404).json({msg:'No hay resultados'})
+                res.status(200).json(resultados)
+
+
+                }else{
+                
+                
+                // Realiza la búsqueda en la base de datos
+                const resultados = await client.findAll({
+                    where: {
+                        userId: asesor,
+                        nombreEmpresa: {
+                            [Op.iLike]: `%${query}%` // Usamos iLike para hacer una búsqueda insensible a mayúsculas/minúsculas
+                        },
+                        include:[{
+                            model: cotizacion
+                        },{
+                            model: register
+                        },{
+                            model:calendario
+                        }, , {
+                            model: user
+                        }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
+
+                    },
+                    limit: 10 // Limita la cantidad de resultados si lo deseas
+                }).catch(err => null);
+
+                // Enviamos respuesta si no hay resultado
+
+                if(!resultados.length) return res.status(404).json({msg:'No hay resultados'})
+                res.status(200).json(resultados)
+                }
+    
+            }catch(err){
+                console.log(err);
+                res.status(500).json({msg: 'Ha ocurrido un error en la principal.'});
+            }
+        },
+    // BUSCADOR DE CLIENTES - PARA COTIZAR
     async SearchClients(req, res){
         try{
             const { query } = req.query; // Captura el parámetro 'query' de la URL
@@ -294,7 +430,11 @@ module.exports = {
                     model: register
                 },{
                     model: calendario
-                }]
+                }, {
+                    model: user
+                }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
+
             }).catch(err => null);
 
             // Contacto 1
@@ -302,7 +442,15 @@ module.exports = {
                 where: {
                     state: 'contacto 2',
                     userId: asesorId
-                }
+                },
+                include:[{
+                    model: register
+                },{
+                    model: calendario
+                }, {
+                    model: user
+                }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
             }).catch(err => null);
 
             // Contacto 1
@@ -315,7 +463,10 @@ module.exports = {
                     model: register
                 },{
                     model: calendario
-                }]
+                }, {
+                    model: user
+                }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
             }).catch(err => null);
 
             // Visita
@@ -329,7 +480,10 @@ module.exports = {
                     model: register
                 },{
                     model: calendario
-                }]
+                }, {
+                    model: user
+                }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
             }).catch(err => null);
 
             // Cotizacion
@@ -343,20 +497,36 @@ module.exports = {
                     model: register
                 },{
                     model: calendario
-                }]
+                }, {
+                    model: user
+                }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
+
             }).catch(err => null);
 
             const searchCotizacionesAprobadas = await cotizacion.findAll({
                 where: {
-                    state: 'aprobada'
+                    state: 'aprobada',
                 },
                 include:[{
                     model: client,
-                    where:{
+                    where: {
                         userId: asesorId
-                    }
-                }]
-            }).catch(err => null);
+                    },
+                    include: [
+                        {
+                            model: calendario
+                        }, {
+                            model: register
+                        }
+                   ]
+            }],
+                order: [['updatedAt', 'DESC'], [{model: client}, { model: register}, 'createdAt', 'DESC']]
+
+            }).catch(err => {
+                console.log(err);
+                return null
+            });
 
             const searchClientsEspera = await client.findAll({
                 where: {
@@ -367,7 +537,11 @@ module.exports = {
                     model: register
                 },{
                     model: calendario
-                }]
+                }, {
+                    model: user
+                }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
+
 
             }).catch(err => null);
 
@@ -381,7 +555,11 @@ module.exports = {
                     model: register
                 },{
                     model: calendario
-                }]
+                }, {
+                    model: user
+                }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
+
             }).catch(err => null);
 
             const searchFuente = await fuente.findAll({
@@ -430,7 +608,9 @@ module.exports = {
                 },
                 include:[{
                     model: register
-                }]
+                }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
+
             }).catch(err => null);
 
         if(!searchIntentos) return res.status(404).json({msg: 'No hay'});
@@ -458,7 +638,8 @@ module.exports = {
                     model: register
                 },{
                     model:calendario
-                }]
+                }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
             }).catch(err => {
                 console.log(err)
                 return null
@@ -488,7 +669,10 @@ module.exports = {
                     model: register
                 },{
                     model:calendario
-                }]
+                }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
+
+
             }).catch(err => null);
     
         if(!searchContactos) return res.status(404).json({msg: 'No hay'});
@@ -515,7 +699,9 @@ module.exports = {
                     model: register
                 },{
                     model:calendario
-                }]
+                }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
+
             }).catch(err => null);
 
         if(!searchContactos) return res.status(404).json({msg: 'No hay'});
@@ -541,7 +727,9 @@ module.exports = {
                     model: register
                 },{
                     model:calendario
-                }]
+                }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
+
             }).catch(err => null);
 
         if(!searchContactos) return res.status(404).json({msg: 'No hay'});
@@ -568,7 +756,9 @@ module.exports = {
                     model: register
                 },{
                     model:calendario
-                }]
+                }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
+
             }).catch(err => null);
 
         if(!searchContactos) return res.status(404).json({msg: 'No hay'});
@@ -595,7 +785,9 @@ module.exports = {
                     model: register
                 },{
                     model:calendario
-                }]
+                }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
+
             }).catch(err => null);
 
         if(!searchContactos) return res.status(404).json({msg: 'No hay'});
@@ -615,13 +807,19 @@ module.exports = {
                 where: {
                     state: 'aprobada'
                 },
-                include:[{
-                    model: cotizacion
+                include:[{model:user},{
+                    model: cotizacion,
+                    where:{
+                        state: 'aprobada'
+                    },
+                    required: true
                 },{
                     model: register
                 },{
                     model:calendario
-                }]
+                }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
+
             }).catch(err => null);
 
         if(!searchContactos) return res.status(404).json({msg: 'No hay'});
@@ -642,13 +840,19 @@ module.exports = {
                         state: 'aprobada',
                         userId: asesorId
                     },
-                    include:[{
-                        model: cotizacion
+                    include:[{model: user},{
+                        model: cotizacion,
+                        where:{
+                            state: 'aprobada'
+                        },
+                        required: true
                     },{
                         model: register
                     },{
                         model:calendario
-                    }]
+                    }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
+
                 }).catch(err => null);
     
             if(!searchContactos) return res.status(404).json({msg: 'No hay'});
@@ -663,19 +867,46 @@ module.exports = {
     // Obtener Calendario
     async getCalendaryAll(req, res){
         try{
-            const searchCaledario = await calendario.findAll({
-                include:[{
-                    model:client,
-                    include: [{
-                        model:user
-                    }]
-                }],
-                order: [['fecha', 'DESC']]
-            }).catch(err => {
-                console.log(err);
-                return null; 
-            });
-            res.status(200).json(searchCaledario);
+            const { asesor } = req.query;
+            
+            if(asesor){
+                const searchCaledario = await calendario.findAll({
+                    include:[{
+                        model:client,
+                        where: {
+                            userId: asesor
+                        },
+                        include: [{
+                            model:user
+                        },{
+                            model: register
+                        }],
+                    }],
+                    order: [['fecha', 'DESC'],
+                    [{ model: client}, { model: register}, 'createdAt', 'DESC']]
+                }).catch(err => {
+                    console.log(err);
+                    return null; 
+                });
+                res.status(200).json(searchCaledario);
+            }else{
+                const searchCaledario = await calendario.findAll({
+                    include:[{
+                        model:client,
+                        include: [{
+                            model:user
+                        },{
+                            model: register
+                        }],
+                    }],
+                    order: [['fecha', 'DESC'],
+                    [{ model: client}, { model: register}, 'createdAt', 'DESC']]
+                }).catch(err => {
+                    console.log(err);
+                    return null; 
+                });
+                res.status(200).json(searchCaledario);
+            }
         }catch(err){
             console.log(err);
             res.status(500).json({msg: 'Ha ocurrido un error en la principal.'});
@@ -755,7 +986,7 @@ module.exports = {
     // INTENTOS
     async dontCallIntentos(req, res){
         try{
-            const { clientId } = req.body;
+            const { clientId, tiempo } = req.body;
 
             // Buscar cliente
             const searchClient = await client.findByPk(clientId).catch(err => {
@@ -777,13 +1008,20 @@ module.exports = {
                 }
             }).then(async (res) => {
                 console.log(res);
-                console.log('Avanza a actualizar el client');
-                
+
+                const programarTiempo = await calendario.create({
+                    type:  `Volver a intentar - En ${estado}`,
+                    fecha: tiempo,
+                    clientId: searchClient.id,
+                    userId: null
+
+                }).catch(err => null);
+
                 const newRegister = register.create({
                     type: estado,
                     tags: null,
                     note: 'No contesto',
-                    tiempo: date,
+                    tiempo: tiempo,
                     clientId: searchClient.id
                 }).catch(err => {
                     console.log(err);
@@ -802,7 +1040,7 @@ module.exports = {
     },
     async contestoSinInteres(req, res){
         try{
-            const { clientId, tag, newState } = req.body;
+            const { clientId, tag, note, newState } = req.body;
             if(!clientId || !tag || !newState) return res.status(501).json({msg: 'Parametros invalidos.'});
 
             // Buscamos client
@@ -829,6 +1067,7 @@ module.exports = {
                     type: searchClient.state,
                     tags: tag,
                     tiempo: date,
+                    note: `Perdido: ${note}` ,
                     clientId: searchClient.id
                 }).catch(err => {
                     console.log(err);
@@ -847,7 +1086,7 @@ module.exports = {
     },
     async contestoPeroLlamarDespues(req, res){
         try{
-            const { clientId, time, type } = req.body;
+            const { clientId, time, type, note, tags } = req.body;
 
             if(!clientId || !time) return res.status(501).json({msg: 'Error en parametros'});
 
@@ -865,7 +1104,8 @@ module.exports = {
             // Actualizar client...
 
             const updateClient = await client.update({
-                state: 'espera'
+                state: 'espera',
+                embudo: searchClient.state
             },{
                 where: {
                     id: clientId,
@@ -878,6 +1118,17 @@ module.exports = {
                     clientId: searchClient.id
 
                 }).catch(err => null);
+
+                const newRegister = await register.create({
+                    type: searchClient.state,
+                    note,
+                    tiempo: time,
+                    tags,
+                    clientId: searchClient.id
+                }).catch(err => {
+                    console.log(err);
+                    return null;
+                })
 
                 return res
             })
@@ -896,7 +1147,7 @@ module.exports = {
     },
     async contestoYTieneInteresReal(req, res){
         try{
-            const { clientId, estado, asesorId, time, tags, direccion, url, fijo, nombreEmpresa, responsable, sector, cargo } = req.body;
+            const { clientId, estado, asesorId, time, tags, direccion, url, fijo, nombreEmpresa, responsable, sector, cargo, note } = req.body;
         
             if(!clientId || !estado || !time || !nombreEmpresa || !responsable || !sector) return res.status(501).json({msg: 'Parametros invalidos'});
             const date = new Date();
@@ -939,6 +1190,7 @@ module.exports = {
                     type: searchClient.state,
                     tags: tags,
                     tiempo: date,
+                    note,
                     clientId: searchClient.id,
                 }).catch(err => {
                     console.log(err);
@@ -967,7 +1219,7 @@ module.exports = {
     // No contesto
     async dontCallContacto(req, res){
         try{
-            const { clientId } = req.body;
+            const { clientId, tiempo } = req.body;
 
             // Buscar cliente
             const searchClient = await client.findByPk(clientId).catch(err => {
@@ -989,13 +1241,19 @@ module.exports = {
                 }
             }).then(async (res) => {
                 console.log(res);
-                console.log('Avanza a actualizar el client');
-                
+                const programarTiempo = await calendario.create({
+                    type:  `Volver a intentar - En ${estado}`,
+                    fecha: tiempo,
+                    clientId: searchClient.id,
+                    userId: null
+
+                }).catch(err => null);
+
                 const newRegister = register.create({
                     type: estado,
                     tags: null,
                     note: 'No fue posible el contacto',
-                    tiempo: date,
+                    tiempo: tiempo,
                     clientId: searchClient.id
                 }).catch(err => {
                     console.log(err);
@@ -1015,7 +1273,7 @@ module.exports = {
     // Contactar Después
     async contestoPeroLlamarDespuesContacto(req, res){
         try{
-            const { clientId, time, type } = req.body;
+            const { clientId, time, type, note, tags } = req.body;
 
             if(!clientId || !time) return res.status(501).json({msg: 'Error en parametros'});
 
@@ -1033,7 +1291,8 @@ module.exports = {
             // Actualizar client...
 
             const updateClient = await client.update({
-                state: 'espera'
+                state: 'espera',
+                embudo: searchClient.state
             },{
                 where: {
                     id: clientId,
@@ -1046,6 +1305,17 @@ module.exports = {
                     clientId: searchClient.id
 
                 }).catch(err => null);
+
+                const newRegister = await register.create({
+                    type: searchClient.state,
+                    note,
+                    tiempo: time,
+                    tags,
+                    clientId: searchClient.id
+                }).catch(err => {
+                    console.log(err);
+                    return null;
+                })
 
                 return res
             })
@@ -1064,7 +1334,7 @@ module.exports = {
     },
     async contestoSinInteresContacto(req, res){
         try{
-            const { clientId, tag, newState } = req.body;
+            const { clientId, tag, note, newState } = req.body;
             if(!clientId || !tag || !newState) return res.status(501).json({msg: 'Parametros invalidos.'});
 
             // Buscamos client
@@ -1091,7 +1361,8 @@ module.exports = {
                     type: searchClient.state,
                     tags: tag,
                     tiempo: date,
-                    clientId: searchClient.id
+                    clientId: searchClient.id,
+                    note: `Perdido: ${note}` 
                 }).catch(err => {
                     console.log(err);
                     return null;
@@ -1109,7 +1380,7 @@ module.exports = {
     },
     async contestoYTieneInteresRealContacto(req, res){
         try{
-            const { clientId, estado, time, COTIZACION, nit, nro, fecha, bruto, descuento, iva, neto } = req.body;
+            const { clientId, note, estado, time, COTIZACION, nit, nro, fecha, bruto, descuento, iva, neto } = req.body;
         
             if(!clientId || !estado || !time) return res.status(501).json({msg: 'Parametros invalidos'});
             const date = new Date();
@@ -1146,6 +1417,7 @@ module.exports = {
                         tags: null,
                         tiempo: date,
                         clientId: searchClient.id,
+                        note
                     }).catch(err => {
                         console.log(err);
                         return null;
@@ -1187,6 +1459,7 @@ module.exports = {
                         type: searchClient.state,
                         tags: null,
                         tiempo: date,
+                        note,
                         clientId: searchClient.id,
                     }).catch(err => {
                         console.log(err);
@@ -1212,7 +1485,7 @@ module.exports = {
     // VISITA
     async contestoSinInteresVisita(req, res){
         try{
-            const { clientId, tag, newState } = req.body;
+            const { clientId, tag, note, newState } = req.body;
             if(!clientId || !tag || !newState) return res.status(501).json({msg: 'Parametros invalidos.'});
 
             // Buscamos client
@@ -1239,6 +1512,7 @@ module.exports = {
                     type: searchClient.state,
                     tags: tag,
                     tiempo: date,
+                    note: `Perdido: ${note}`,
                     clientId: searchClient.id
                 }).catch(err => {
                     console.log(err);
@@ -1258,7 +1532,7 @@ module.exports = {
     // Contactar Después
     async contestoPeroLlamarDespuesVisita(req, res){
         try{
-                const { clientId, time, type } = req.body;
+                const { clientId, time, type, note, tags } = req.body;
     
                 if(!clientId || !time) return res.status(501).json({msg: 'Error en parametros'});
     
@@ -1276,7 +1550,8 @@ module.exports = {
                 // Actualizar client...
     
                 const updateClient = await client.update({
-                    state: 'espera'
+                    state: 'espera',
+                    embudo: searchClient.state
                 },{
                     where: {
                         id: clientId,
@@ -1290,6 +1565,17 @@ module.exports = {
                         userId: searchClient.userId
     
                     }).catch(err => null);
+
+                    const newRegister = await register.create({
+                        type: searchClient.state,
+                        note,
+                        tiempo: time,
+                        tags,
+                        clientId: searchClient.id
+                    }).catch(err => {
+                        console.log(err);
+                        return null;
+                    })
     
                     return res
                 })
@@ -1352,7 +1638,7 @@ module.exports = {
     // COTIZACION
     async visitaACotizacion(req, res){
         try{
-            const { clientId, nit, nro, fecha, bruto, descuento, iva, neto } = req.body;
+            const { clientId, note, nit, nro, fecha, bruto, descuento, iva, neto } = req.body;
         
             if(!clientId ) return res.status(501).json({msg: 'Parametros invalidos'});
             const date = new Date();
@@ -1393,6 +1679,7 @@ module.exports = {
                     const newRegister = await register.create({
                         type: searchClient.state,
                         tags: null,
+                        note,
                         tiempo: date,
                         clientId: searchClient.id,
                     }).catch(err => {
@@ -1586,7 +1873,7 @@ module.exports = {
     // CAMBIAR COTIZACION A APROBADA O PERDIDA
     async changeStateToCotizacion(req, res){
         try{
-            const { clientId, cotizacionId, stateEnter } = req.body;
+            const { clientId, cotizacionId, stateEnter, note } = req.body;
 
             // Buscamos client
             const searchClient = await client.findOne({
@@ -1631,6 +1918,16 @@ module.exports = {
                 console.log(err);
                 return null;
             });
+
+            const createRegister = await register.create({
+                    type: searchClient.state,
+                    note: note ,
+                    clientId: searchClient.id
+            })
+            .catch(err => {
+                console.log(err);
+                return null
+            })
             
             if(!updateClient) return res.status(502).json({msg: 'No hemos podido actualizar.'});
 
@@ -1684,7 +1981,7 @@ module.exports = {
                     const newRegister = await register.create({
                         type: searchClient.state,
                         tags: null,
-                        note: 'Aplazando cotizacion 7 dias',
+                        note: 'Aplazando cotizacion 8 dias',
                         tiempo: date, 
                         clientId: searchClient.id,
                     }).catch(err => {
@@ -1721,7 +2018,6 @@ module.exports = {
                 },
                 include:[{
                     model: user,
-                    attributes:['name', 'lastName', 'rango', 'photo']
                 },{
                     model: cotizacion
                 },{
@@ -1729,7 +2025,7 @@ module.exports = {
                 },{
                     model:calendario
                 }],
-                order: [[register, 'createdAt', 'DESC']]
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
             }).catch(err => null);
 
         if(!searchContactos) return res.status(404).json({msg: 'No hay'});
@@ -1758,7 +2054,8 @@ module.exports = {
                 },{
                     model:calendario
                 }],
-                order: [[register, 'createdAt', 'DESC']]
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
+
             }).catch(err => null);
 
         if(!searchContactos) return res.status(404).json({msg: 'No hay'});
@@ -1782,7 +2079,6 @@ module.exports = {
                 },
                 include:[{
                     model: user,
-                    attributes:['name', 'lastName', 'rango', 'photo']
                 },{
                     model: cotizacion
                 },{
@@ -1790,7 +2086,7 @@ module.exports = {
                 },{
                     model:calendario
                 }],
-                order: [[register, 'createdAt', 'DESC']]
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
             }).catch(err => null);
 
         if(!searchContactos) return res.status(404).json({msg: 'No hay'});
@@ -1820,7 +2116,7 @@ module.exports = {
                 },{
                     model:calendario
                 }],
-                order: [[register, 'createdAt', 'DESC']]
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
             }).catch(err => null);
 
         if(!searchContactos) return res.status(404).json({msg: 'No hay'});
