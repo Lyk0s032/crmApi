@@ -1214,7 +1214,36 @@ module.exports = {
         }
     },
 
+    //Nota a registro 
+    async newNote(req, res){ 
+        try{
+            const { note, tags, clientId } = req.body;
+            
+            if(!note || !clientId) return res.status(501).json({msg: 'Ha ocurrido un error en la principal.'});
+            // Caso contrario, avanzamos
 
+            const newRegister = await register.create({
+                note:note,
+                clientId,
+                tiempo: new Date(),
+                type: 'Nueva nota'
+            }).catch(err => { 
+                console.log(err);
+                return null;
+            }).catch(err => {
+                console.log(err);
+                return null;
+            });
+
+            if(!newRegister) return res.status(502).json({msg: 'No hemos podido crear este registro.'});
+
+            // Caso contrario
+            res.status(201).json(newRegister);
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'Ha ocurrido un error en la principal.'});
+        }
+    },
     // CONTACTO
     // No contesto
     async dontCallContacto(req, res){
@@ -2127,4 +2156,6 @@ module.exports = {
             res.status(500).json({msg: 'Error en la principal.'});
         }
     }
+
+
 }
