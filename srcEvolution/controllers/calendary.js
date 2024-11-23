@@ -1,6 +1,6 @@
 const express = require('express');
 const { client, user,register,  calendario, cotizacion} = require('../db/db');
-const { Op, literal, fn, col } = require('sequelize');
+const { Op, literal, fn, col, Sequelize } = require('sequelize');
 const dayjs = require('dayjs');
 
 
@@ -9,33 +9,79 @@ module.exports = {
     // Notificaciones
     async getNotifications(req, res){
         try {
+            // Recibimos parametro por query
+            const { asesorId } = req.query;
+
+
             // Calculamos el rango exacto de las fechas
             const fechaActual = dayjs().format('MM/DD/YYYY') // Inicio del día actual
-            const fechaLimite = dayjs().add(5, 'day').format('MM/DD/YYYY'); // Dos días después       
-            const results = await calendario.findAll({
-                where: literal(
-                    `TO_DATE("calendario"."fecha", 'MM/DD/YYYY') BETWEEN TO_DATE('${fechaActual}', 'MM/DD/YYYY') AND TO_DATE('${fechaLimite}', 'MM/DD/YYYY')`
-                ), 
-                include:[{
-                    model: client,
+            const fechaLimite = dayjs().add(5, 'day').format('MM/DD/YYYY'); // Dos días después
+            
+            
+            // Segun la existencia del asesor, consultamos
+            if(!asesorId){
+                const results = await calendario.findAll({
+                    where: literal(
+                        `TO_DATE("calendario"."fecha", 'MM/DD/YYYY') BETWEEN TO_DATE('${fechaActual}', 'MM/DD/YYYY') AND TO_DATE('${fechaLimite}', 'MM/DD/YYYY')`
+                    ), 
                     include:[{
-                        model: user,
-                    }, {
-                        model: register  
-                    }, {
-                        model: cotizacion
-                    }]  
-                }],
-                order:[literal(`TO_DATE("calendario"."fecha", 'MM/DD/YYYY') ASC`), [{model: client}, {model: register}, 'tiempo', 'DESC']],
+                        model: client,
+                        include:[{
+                            model: user,
+                        }, {
+                            model: register  
+                        }, {
+                            model: cotizacion
+                        }]  
+                    }],
+                    order:[literal(`TO_DATE("calendario"."fecha", 'MM/DD/YYYY') ASC`), [{model: client}, {model: register}, 'tiempo', 'DESC']],
 
-            }).catch(err => {
-                console.log(err);
-                return null
-            });
+                }).catch(err => {
+                    console.log(err);
+                    return null
+                });
 
-            if(!results ||!results.length) return res.status(404).json({msg: 'No hay resultados'});
+                if(!results ||!results.length) return res.status(404).json({msg: 'No hay resultados'});
 
-            res.status(200).json(results)
+                res.status(200).json(results)
+
+
+            }else{
+
+                // Si el asesor existe, enviamos esto.
+                const results = await calendario.findAll({
+                    where: {
+                        [Op.and]: [
+                            Sequelize.literal(
+                                `TO_DATE("calendario"."fecha", 'MM/DD/YYYY') 
+                                BETWEEN TO_DATE('${fechaActual}', 'MM/DD/YYYY') 
+                                AND TO_DATE('${fechaLimite}', 'MM/DD/YYYY')`,
+                            ),
+                            {userId: asesorId}
+                        ],
+                    }, 
+                    include:[{
+                        model: client,
+                        include:[{
+                            model: user,
+                        }, {
+                            model: register  
+                        }, {
+                            model: cotizacion
+                        }]  
+                    }],
+
+                }).catch(err => {
+                    console.log(err);
+                    return null
+                });
+                console.log(fechaActual);
+                console.log(fechaLimite);
+
+                if(!results || !results.length) return res.status(404).json({msg: 'No hay resultados'});
+
+                res.status(200).json(results)
+            }
 
         }catch(err){
             console.log(err);

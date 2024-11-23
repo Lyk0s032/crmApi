@@ -684,7 +684,7 @@ module.exports = {
             res.status(500).json({msg: 'Ha ocurrido un error en la principal'});
         }
     },
-
+ 
     // GET ALL VISITAS
     async getAllVisitas(req, res){
         try{
@@ -1248,7 +1248,7 @@ module.exports = {
     // No contesto
     async dontCallContacto(req, res){
         try{
-            const { clientId, tiempo } = req.body;
+            const { clientId, tiempo, userId } = req.body;
 
             // Buscar cliente
             const searchClient = await client.findByPk(clientId).catch(err => {
@@ -1274,7 +1274,7 @@ module.exports = {
                     type:  `Volver a intentar - En ${estado}`,
                     fecha: tiempo,
                     clientId: searchClient.id,
-                    userId: null
+                    userId: searchClient.userId
 
                 }).catch(err => null);
 
@@ -1302,7 +1302,7 @@ module.exports = {
     // Contactar Después
     async contestoPeroLlamarDespuesContacto(req, res){
         try{
-            const { clientId, time, type, note, tags } = req.body;
+            const { clientId, time, userId, type, note, tags } = req.body;
 
             if(!clientId || !time) return res.status(501).json({msg: 'Error en parametros'});
 
@@ -1331,7 +1331,8 @@ module.exports = {
                 const nuevoTiempo = await calendario.create({
                     type: `Llamar despues - En ${searchClient.state}`,
                     fecha: time,
-                    clientId: searchClient.id
+                    clientId: searchClient.id,
+                    userId: searchClient.userId
 
                 }).catch(err => null);
 
@@ -2021,7 +2022,8 @@ module.exports = {
                     const nuevoTiempo = await calendario.create({
                         type: `Cotizacion aplazada`,
                         fecha: `${fechaAplazada.getMonth() + 1}-${fechaAplazada.getDate()}-${fechaAplazada.getFullYear()}`,
-                        clientId: searchClient.id
+                        clientId: searchClient.id,
+                        userId: searchClient.userId
     
                     }).catch(err => null);
     
