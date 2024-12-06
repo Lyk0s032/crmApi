@@ -893,6 +893,10 @@ module.exports = {
     },
          // GET ALL APROBADAS
          async getAllAprobadasByAsesor(req, res){
+            const inicio = dayjs().date(6); // Día 6 del mes actual
+            const fin = inicio.add(1, 'month'); // Día 6 del próximo mes
+
+
             try{
                 const { asesorId } = req.params;
                 const searchContactos = await client.findAll({
@@ -903,7 +907,10 @@ module.exports = {
                     include:[{model: user},{
                         model: cotizacion,
                         where:{
-                            state: 'aprobada'
+                            state: 'aprobada',
+                            updatedAt:{
+                                [Op.between]: [inicio, fin]
+                            }
                         },
                         required: true
                     },{
