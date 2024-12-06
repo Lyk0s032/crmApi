@@ -1879,7 +1879,7 @@ module.exports = {
                 email: email,
                 fuenteId,
                 userId: userId,
-                state: embudo == 'llamada' ? 'contacto 1' : embudo == 'vista' ? 'visita' : null
+                state: embudo == 'llamada' ? 'contacto 1' : embudo == 'visita' ? 'visita' : null
             }).then(async (res) => {
 
                     const programarTiempo = await calendario.create({
