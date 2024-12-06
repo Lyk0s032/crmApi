@@ -77,7 +77,7 @@ module.exports = {
             const searchCotizacionesAprobadas = await cotizacion.findAll({
                 where: {
                     state: 'aprobada',
-                    createdAt:{
+                    updatedAt:{
                         [Op.between]: [inicio, fin]
                     }
                     
@@ -196,7 +196,7 @@ module.exports = {
                 
                 where: {
                     state: 'aprobada',
-                    createdAt:{
+                    updatedAt:{
                         [Op.between]: [inicio, fin]
                     }
                 },
@@ -856,6 +856,10 @@ module.exports = {
      // GET ALL APROBADAS
      async getAllAprobadas(req, res){
         try{
+            const inicio = dayjs().date(6); // Día 6 del mes actual
+            const fin = inicio.add(1, 'month'); // Día 6 del próximo mes
+
+
             const searchContactos = await client.findAll({
                 where: {
                     state: 'aprobada'
@@ -863,7 +867,10 @@ module.exports = {
                 include:[{model:user},{
                     model: cotizacion,
                     where:{
-                        state: 'aprobada'
+                        state: 'aprobada',
+                        updatedAt:{
+                            [Op.between]: [inicio, fin]
+                        }
                     },
                     required: true
                 },{
