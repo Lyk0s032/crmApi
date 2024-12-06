@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const {Sequelize,  DataTypes, INTEGER } = require('sequelize');
 
 const {db, Op } = require('./srcEvolution/db/db');
-const { getAllClients, newFuente, newClient, dontCallIntentos, contestoSinInteres, contestoPeroLlamarDespues, contestoYTieneInteresReal, dontCallContacto, contestoPeroLlamarDespuesContacto, contestoSinInteresContacto, contestoYTieneInteresRealContacto, contestoSinInteresVisita, contestoPeroLlamarDespuesVisita, deseaOtroServicio, visitaACotizacion, changeStateToCotizacion, aplazarCotizacion, getClientsByState, getAllIntentos, getAllContactos, getAllVisitas, getAllCotizaciones, getCalendaryAll, getAllAprobadas, getClientsByStateByAsesor, getAllContactosByAsesor, getAllVisitasByAsesor, getAllCotizacionesByAsesor, getAllAprobadasByAsesor, VisualizarAsesor, createClientAndCotizacion, DeleteClient, ChangeClientOfAsesor, SearchClients, UpdateCliente, getClientsOnEsperaByAsesor, getClientsOnEspera, getClientsOnPerdidoEspera, getClientsOnPerdidoByAsesor, getAllClientsVisualizar, SearchClientsParaVisualizar, newNote } = require('./srcEvolution/controllers/client');
+const { getAllClients, newFuente, newClient, dontCallIntentos, contestoSinInteres, contestoPeroLlamarDespues, contestoYTieneInteresReal, dontCallContacto, contestoPeroLlamarDespuesContacto, contestoSinInteresContacto, contestoYTieneInteresRealContacto, contestoSinInteresVisita, contestoPeroLlamarDespuesVisita, deseaOtroServicio, visitaACotizacion, changeStateToCotizacion, aplazarCotizacion, getClientsByState, getAllIntentos, getAllContactos, getAllVisitas, getAllCotizaciones, getCalendaryAll, getAllAprobadas, getClientsByStateByAsesor, getAllContactosByAsesor, getAllVisitasByAsesor, getAllCotizacionesByAsesor, getAllAprobadasByAsesor, VisualizarAsesor, createClientAndCotizacion, DeleteClient, ChangeClientOfAsesor, SearchClients, UpdateCliente, getClientsOnEsperaByAsesor, getClientsOnEspera, getClientsOnPerdidoEspera, getClientsOnPerdidoByAsesor, getAllClientsVisualizar, SearchClientsParaVisualizar, newNote, createClientAndSelectEmbudo, updateCotizacion, getAllAsesores } = require('./srcEvolution/controllers/client');
 const { getCalendary, getNotifications } = require('./srcEvolution/controllers/calendary');
 const { signIn, signUp } = require('./srcEvolution/controllers/user');
 const isAuthenticated = require('./srcEvolution/controllers/authentication');
@@ -48,6 +48,8 @@ app.get('/clients/get/searchClients', SearchClients);
 app.get('/client/get/all/visualizar', getAllClientsVisualizar);
 app.get('/clients/get/searchClientsAll', SearchClientsParaVisualizar);
 
+app.get('/asesores/data', getAllAsesores)
+
 // CALENDARIO
         app.get('/calendario/get/all', getCalendaryAll);
         // NOTIFICACIONES
@@ -61,13 +63,19 @@ app.post('/user/signIn', signIn);       // Iniciar sesion
 app.post('/user/signUp', signUp);       // Crear cuenta - USUARIO
   // CREAR CLIENTE Y COTIZACION AL MiSMO TIEMPO
   app.post('/client/post/newAndCotizacion', createClientAndCotizacion);
-
+  // CREAR Y DIRECIONAR EMBUDO AL MISMO TIEMPO
+  app.post('/client/post/newAndEmbudo', createClientAndSelectEmbudo); // CREAR CLIENTE Y SELECCIONAR EMBUDO.
+  
+  
+  
+  
   // DELETE
   app.delete('/client/delete/registro/:clientId', DeleteClient); // Eliminar cliente
   // PUT
   app.put('/client/put/update', UpdateCliente); // Actualizar cliente
   app.put('/client/put/changeAsesor', ChangeClientOfAsesor); // Cambiar cliente de asesor
-
+  // ACTUALIZAR COTIZACION
+  app.put('/client/put/cotizacion/update', updateCotizacion); // Utilizamos esta ruta para actualizar la cotizacion
  
 // TODO
 app.get('/clients/get/all/panel', getClientsByState);

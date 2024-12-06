@@ -1,11 +1,19 @@
 const express = require('express');
-const { client, user, calendario, fuente, cotizacion, register, meta, Op} = require('../db/db');
-const {  Sequelize } = require('sequelize');
+const { client, user, calendario, fuente, cotizacion, register, meta } = require('../db/db');
+const {  Sequelize, Op } = require('sequelize');
+const dayjs = require('dayjs');
+
 
 module.exports = {
     // Buscar clientes y agrupar por intento 1, intento 2, intento 3
     async getClientsByState(req, res){
         try{
+
+             // Fecha actual y rango
+             const inicio = dayjs().date(6); // Día 6 del mes actual
+             const fin = inicio.add(1, 'month'); // Día 6 del próximo mes
+
+
             // Realizamos consultas por cada unos de los estados
             // Intento 1
             const searchIntentoOne = await client.findAll({
@@ -68,7 +76,11 @@ module.exports = {
 
             const searchCotizacionesAprobadas = await cotizacion.findAll({
                 where: {
-                    state: 'aprobada'
+                    state: 'aprobada',
+                    createdAt:{
+                        [Op.between]: [inicio, fin]
+                    }
+                    
                 },
                 include:[{
                     model: client
@@ -129,9 +141,15 @@ module.exports = {
     // Buscar clientes y agrupar por intento 1, intento 2, intento 3
     async getClientsByStateByAsesor(req, res){
         try{
-            const { asesorId } = req.params;
+            const { asesorId, ano, mes } = req.params;
             // Realizamos consultas por cada unos de los estados
 
+            // Fecha actual y rango
+            const inicio = dayjs().date(6); // Día 6 del mes actual
+            const fin = inicio.add(1, 'month'); // Día 6 del próximo mes
+            // const startDate = '2024-11-05'; // Fecha de inicio
+            // const endDate = '2025-01-05';   // Fecha de fin
+            console.log(fin)
             // Contacto 1
             const searchContactOne = await client.findAll({
                 where: {
@@ -175,8 +193,12 @@ module.exports = {
             }).catch(err => null);
 
             const searchCotizacionesAprobadas = await cotizacion.findAll({
+                
                 where: {
-                    state: 'aprobada'
+                    state: 'aprobada',
+                    createdAt:{
+                        [Op.between]: [inicio, fin]
+                    }
                 },
                 include:[{
                     model: client,
@@ -184,7 +206,10 @@ module.exports = {
                         userId: asesorId
                     }
                 }]
-            }).catch(err => null);
+            }).catch(err => {
+                console.log(err);
+                return null
+            });
 
             const searchClientsEspera = await client.findAll({
                 where: {
@@ -234,6 +259,34 @@ module.exports = {
         }catch(err){
             console.log(err);
             res.status(200).json({msg: 'Ha ocurrido un error en la principal'});
+        }
+    },
+
+    async getAllAsesores(req, res){
+        try{
+            const searchAllAsesores = await user.findAll({
+                where: {
+                    rango: 'asesor'    
+                },
+                include:[{
+                    model: client,
+                    where: {
+                        state: {
+                            [Op.between]: ['contacto 1', 'contacto 2', 'contacto 3', 'visita']
+                        }
+                    }
+                }],
+                group: ['client.state'],
+            }).catch(Err => {
+                console.log(Err);
+                return null
+            });
+
+            if(!searchAllAsesores) return res.status(404).json({msg: 'Sin resultados'});
+            res.status(200).json(searchAllAsesores)
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'Ha ocurrido un error en la principal'});
         }
     },
     // GET ALL CLIENTES ON PANEL
@@ -1782,6 +1835,127 @@ module.exports = {
         }catch(err){
             console.log(err);
             res.status(500).json({msg: 'Ha ocurrido un error en la principal.'});
+        }
+    },
+
+    // Crear cliente y seleccionar parte del embudo.
+    async createClientAndSelectEmbudo(req, res){
+        try{
+            // Recibimos parametros por body
+            const { userId, name, phone, email, nombreEmpresa, url, fijo, cargo, direccion, fuenteId, 
+                embudo, note, time, tags
+            } = req.body;
+
+            // Validamos que los datos entren correctamente.
+            if(!userId || !phone || !name || !embudo || !fuenteId ) return res.status(501).json({msg: 'Ha ocurrido un error en la principal.'});
+
+
+            // Caso contrario, avanzamos
+            const date = new Date();
+            // Cremoas cliente
+            
+            const createClient = await client.create({
+                name,
+                phone,
+                nombreEmpresa: nombreEmpresa,
+                url: url,
+                fijo: fijo,
+                rangoEncargado: cargo,
+                direccion: direccion,
+                email: email,
+                fuenteId,
+                userId: userId,
+                state: embudo == 'llamada' ? 'contacto 1' : embudo == 'vista' ? 'visita' : null
+            }).then(async (res) => {
+
+                    const programarTiempo = await calendario.create({
+                        type: embudo == 'llamada' ? 'Solicita una llamada' : embudo == 'visita' ? 'Solicita una visita este cliente' : null,
+                        fecha: time,
+                        clientId: res.id,
+                        userId: userId
+
+                    }).catch(err => null);
+
+                    const newRegister = await register.create({
+                        type: `Creado por el asesor`,
+                        tags: tags,
+                        tiempo: date,
+                        note,
+                        clientId: res.id,
+                    }).catch(err => {
+                        console.log(err);
+                        return null;
+                    })
+
+                    return res
+            })
+            .catch(err => {
+                console.log(err);
+                return null;
+            });
+
+            if(!createClient) return res.status(502).json({msg: 'No hemos podido crear este cliente'});
+            // Caso contrario, avanzamos...
+            res.status(201).json({msg: 'Cliente creado con exito.'});
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'Ha ocurrido un error en la principal.'});
+        }
+    },
+
+    // Actualizar cotization
+    async updateCotizacion(req, res){
+        try{
+            // Recibimos parametros por body
+            const { cotizacionId, nit, nota, nro, bruto, iva, descuento, neto, userId, clientId } = req.body;
+
+            // Validamos que los datos entren correctamente
+            if(!cotizacionId || !nit || !nro || !bruto || !descuento || !userId) return res.status(501).json({msg:'Los parametros no son validos.'});
+            
+            
+            // Caso contrario, avanzamos
+            // Obtenemos la fecha actual
+            const date = new Date();
+            // Avanzamos a actualizar cotizacion
+        
+            const updateCotizacion = await cotizacion.update({
+                nit,
+                nro,
+                bruto,
+                IVA: iva ? iva : 0,
+                descuento,
+                neto
+
+            },{
+                where: {
+                    id: cotizacionId
+                }
+            }).then(async (resu) => {
+                console.log(resu);
+
+                const newRegister = await register.create({
+                    type: 'Cotizacion actualizada.',
+                    tags: ["Cotizacion actualizada"],
+                    tiempo: date,
+                    note: nota,
+                    clientId: clientId,
+                }).catch(err => {
+                    console.log(err);
+                    return null;
+                })
+                return res
+            }).catch(err => {
+                console.log(err);
+                return null;
+            });
+
+            if(!updateCotizacion) return res.status(502).json({msg: 'No hemos podido actualizar esto.'});
+            // Caso contrario, avanzamos
+            res.status(201).json({msg: 'Actualizado con exito.'});
+
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'HA ocurrido un error en la principal.'});
         }
     },
 
