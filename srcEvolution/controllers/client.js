@@ -10,8 +10,11 @@ module.exports = {
         try{
 
              // Fecha actual y rango
-             const inicio = dayjs().date(6); // Día 6 del mes actual
-             const fin = inicio.add(1, 'month'); // Día 6 del próximo mes
+             const inicio = dayjs().date(6).startOf('day'); // Día 6 del mes actual
+             const fin = inicio.add(1, 'month').endOf('day'); // Día 6 del próximo mes
+ 
+             const startDate = inicio.toDate(); // Inicio del día    
+             const endDate = fin.toDate();     // Fin del día
 
 
             // Realizamos consultas por cada unos de los estados
@@ -78,7 +81,7 @@ module.exports = {
                 where: {
                     state: 'aprobada',
                     updatedAt:{
-                        [Op.between]: [inicio, fin]
+                        [Op.between]: [startDate, endDate]
                     }
                     
                 },
@@ -145,8 +148,11 @@ module.exports = {
             // Realizamos consultas por cada unos de los estados
 
             // Fecha actual y rango
-            const inicio = dayjs().date(6); // Día 6 del mes actual
-            const fin = inicio.add(1, 'month'); // Día 6 del próximo mes
+            const inicio = dayjs().date(6).startOf('day'); // Día 6 del mes actual
+            const fin = inicio.add(1, 'month').endOf('day'); // Día 6 del próximo mes
+
+            const startDate = inicio.toDate(); // Inicio del día    
+            const endDate = fin.toDate();     // Fin del día
             // const startDate = '2024-11-05'; // Fecha de inicio
             // const endDate = '2025-01-05';   // Fecha de fin
             console.log(fin)
@@ -197,7 +203,7 @@ module.exports = {
                 where: {
                     state: 'aprobada',
                     updatedAt:{
-                        [Op.between]: [inicio, fin]
+                        [Op.between]: [startDate, endDate]
                     }
                 },
                 include:[{
@@ -856,9 +862,11 @@ module.exports = {
      // GET ALL APROBADAS
      async getAllAprobadas(req, res){
         try{
-            const inicio = dayjs().date(6); // Día 6 del mes actual
-            const fin = inicio.add(1, 'month'); // Día 6 del próximo mes
+            const inicio = dayjs().date(6).startOf('day'); // Día 6 del mes actual
+            const fin = inicio.add(1, 'month').endOf('day'); // Día 6 del próximo mes
 
+            const startDate = inicio.toDate(); // Inicio del día    
+            const endDate = fin.toDate();     // Fin del día
 
             const searchContactos = await client.findAll({
                 where: {
@@ -869,7 +877,7 @@ module.exports = {
                     where:{
                         state: 'aprobada',
                         updatedAt:{
-                            [Op.between]: [inicio, fin]
+                            [Op.between]: [startDate, endDate]
                         }
                     },
                     required: true
@@ -893,9 +901,11 @@ module.exports = {
     },
          // GET ALL APROBADAS
          async getAllAprobadasByAsesor(req, res){
-            const inicio = dayjs().date(6); // Día 6 del mes actual
-            const fin = inicio.add(1, 'month'); // Día 6 del próximo mes
+            const inicio = dayjs().date(6).startOf('day'); // Día 6 del mes actual
+            const fin = inicio.add(1, 'month').endOf('day'); // Día 6 del próximo mes
 
+            const startDate = inicio.toDate(); // Inicio del día    
+            const endDate = fin.toDate();     // Fin del día
 
             try{
                 const { asesorId } = req.params;
@@ -909,7 +919,7 @@ module.exports = {
                         where:{
                             state: 'aprobada',
                             updatedAt:{
-                                [Op.between]: [inicio, fin]
+                                [Op.between]: [startDate, endDate]
                             }
                         },
                         required: true
