@@ -27,7 +27,8 @@ module.exports = {
                     },{
                         model: register
                     }]
-                }]
+                }],
+                order: [['updatedAt', 'DESC'], [{ model: register}, 'createdAt', 'DESC']]
             }).catch(err => {
                 console.log(err);
                 return null;
