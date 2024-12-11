@@ -5,6 +5,63 @@ const dayjs = require('dayjs');
 
 
 module.exports = {
+    // APP
+    async showAsesorData(req, res){
+        try{
+            const { id } = req.params;
+
+            if(!id) return res.status(501).json({msg: 'Parametro invalido.'})
+            // Caso contrario, consultamos
+
+            const searchAsesor = await user.findByPk(id, {
+                include: [{
+                    model: client,
+                    where: {
+                        state: {
+                            [Op.or]: ['contacto 1', 'contacto 2', 'contacto 3', 'visita', 'espera']
+                        },
+                        
+                    },
+                    include:[{
+                        model: calendario
+                    },{
+                        model: register
+                    }]
+                }]
+            }).catch(err => {
+                console.log(err);
+                return null;
+            });
+
+            if(!searchAsesor) return res.status(404).json({msg: 'No hemos encontrado esto.'});
+
+            // Caso contrario, avanzamos...
+            res.status(200).json(searchAsesor)
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'Ha ocurrido un error en la principal'});
+        }
+    },
+    async showAsesores(req, res){
+        try{
+            const searchAsesores = await user.findAll({
+                where: {
+                    rango: 'asesor'
+                }
+            }).catch(err => {
+                console.log(err);
+                return null;
+            });
+
+            if(!searchAsesores || !searchAsesores.length) return res.status(404).json({msg: 'no hemos encontrado asesores'});
+
+            // Caso contrario
+            res.status(200).json(searchAsesores);
+        }catch(err){
+            console.log(err);
+            res.status(500).json({msg: 'Ha ocurrido un error en la principal'})
+        }
+    },
     // Buscar clientes y agrupar por intento 1, intento 2, intento 3
     async getClientsByState(req, res){
         try{

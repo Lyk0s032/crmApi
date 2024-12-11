@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const {Sequelize,  DataTypes, INTEGER } = require('sequelize');
 
 const {db, Op } = require('./srcEvolution/db/db');
-const { getAllClients, newFuente, newClient, dontCallIntentos, contestoSinInteres, contestoPeroLlamarDespues, contestoYTieneInteresReal, dontCallContacto, contestoPeroLlamarDespuesContacto, contestoSinInteresContacto, contestoYTieneInteresRealContacto, contestoSinInteresVisita, contestoPeroLlamarDespuesVisita, deseaOtroServicio, visitaACotizacion, changeStateToCotizacion, aplazarCotizacion, getClientsByState, getAllIntentos, getAllContactos, getAllVisitas, getAllCotizaciones, getCalendaryAll, getAllAprobadas, getClientsByStateByAsesor, getAllContactosByAsesor, getAllVisitasByAsesor, getAllCotizacionesByAsesor, getAllAprobadasByAsesor, VisualizarAsesor, createClientAndCotizacion, DeleteClient, ChangeClientOfAsesor, SearchClients, UpdateCliente, getClientsOnEsperaByAsesor, getClientsOnEspera, getClientsOnPerdidoEspera, getClientsOnPerdidoByAsesor, getAllClientsVisualizar, SearchClientsParaVisualizar, newNote, createClientAndSelectEmbudo, updateCotizacion, getAllAsesores } = require('./srcEvolution/controllers/client');
+const { getAllClients, newFuente, newClient, dontCallIntentos, contestoSinInteres, contestoPeroLlamarDespues, contestoYTieneInteresReal, dontCallContacto, contestoPeroLlamarDespuesContacto, contestoSinInteresContacto, contestoYTieneInteresRealContacto, contestoSinInteresVisita, contestoPeroLlamarDespuesVisita, deseaOtroServicio, visitaACotizacion, changeStateToCotizacion, aplazarCotizacion, getClientsByState, getAllIntentos, getAllContactos, getAllVisitas, getAllCotizaciones, getCalendaryAll, getAllAprobadas, getClientsByStateByAsesor, getAllContactosByAsesor, getAllVisitasByAsesor, getAllCotizacionesByAsesor, getAllAprobadasByAsesor, VisualizarAsesor, createClientAndCotizacion, DeleteClient, ChangeClientOfAsesor, SearchClients, UpdateCliente, getClientsOnEsperaByAsesor, getClientsOnEspera, getClientsOnPerdidoEspera, getClientsOnPerdidoByAsesor, getAllClientsVisualizar, SearchClientsParaVisualizar, newNote, createClientAndSelectEmbudo, updateCotizacion, getAllAsesores, showAsesores, showAsesorData } = require('./srcEvolution/controllers/client');
 const { getCalendary, getNotifications } = require('./srcEvolution/controllers/calendary');
 const { signIn, signUp } = require('./srcEvolution/controllers/user');
 const isAuthenticated = require('./srcEvolution/controllers/authentication');
@@ -29,6 +29,9 @@ app.get('/', (req, res)  => {
     res.send('Running CRM');
 })
 
+// APLICACION
+app.get('/app/asesores', showAsesores); // Mostrar aseores disponibles
+app.get('/app/asesor/:id', showAsesorData); // Mostrar asesor especifico
 // Usuarios - vendedores.
 app.get('/app/signIn/', isAuthenticated, async (req, res) => {
   try {
