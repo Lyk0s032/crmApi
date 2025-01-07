@@ -68,7 +68,7 @@ module.exports = {
         try{
 
              // Fecha actual y rango
-             const inicio = dayjs('2024-12-05').date(6).startOf('day'); // Día 6 del mes actual
+             const inicio = dayjs('2025-01-05').date(6).startOf('day'); // Día 6 del mes actual
              const fin = inicio.add(1, 'month').endOf('day'); // Día 6 del próximo mes
  
              const startDate = inicio.toDate(); // Inicio del día    
