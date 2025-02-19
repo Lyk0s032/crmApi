@@ -33,7 +33,7 @@ app.get('/', (req, res)  => {
 })
 
 // Usuarios - vendedores.
-app.get('/app/signIn/', isAuthenticated, async (req, res) => {
+app.get('/app/signIn', isAuthenticated, async (req, res) => {
   try {
       console.log(req.user);
       res.status(200).json({user: req.user});
