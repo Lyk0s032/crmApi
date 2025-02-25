@@ -84,9 +84,7 @@ module.exports = {
                     where: {
                         phone:phone
                     },
-                    include:[{
-                        model:calendario
-                    }]
+                    ]
                 }).catch(err => {
                     console.log(err);
                     return null;
