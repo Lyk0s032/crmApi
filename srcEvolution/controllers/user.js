@@ -83,7 +83,7 @@ module.exports = {
                 const usuario = await user.findOne({
                     where: {
                         phone:phone
-                    },
+                    }
                     ]
                 }).catch(err => {
                     console.log(err);
