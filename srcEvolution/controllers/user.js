@@ -84,7 +84,6 @@ module.exports = {
                     where: {
                         phone:phone
                     }
-                    ]
                 }).catch(err => {
                     console.log(err);
                     return null;
